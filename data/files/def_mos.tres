@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="FileData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/file_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/blob_data.gd" id="2"]
+
+[sub_resource type="Resource" id="blob1"]
+script = ExtResource("2")
+id = "meta_tag"
+label = "meta.tag  [identity block]"
+should_remove = false
+
+[sub_resource type="Resource" id="blob2"]
+script = ExtResource("2")
+id = "sys_watcher"
+label = "sys.watcher  [background hook]"
+should_remove = true
+
+[resource]
+script = ExtResource("1")
+filename = "def"
+extension = "mos"
+is_locked = false
+is_corrupted = false
+content = ""
+reveals_clue = "sys.watcher ไม่มี timestamp เหมือน blob ตัวอื่นในไฟล์นี้เลย"
+blobs = [SubResource("blob1"), SubResource("blob2")]
+last_modified_date = ""
+last_modified_by = ""

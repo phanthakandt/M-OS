@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RuleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/rule_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+rule_number = 1
+text = "ข้อมูลทั้งหมดนี้เป็นทรัพย์สินส่วนบุคคล ห้ามเปิดไฟล์ใดๆ ก็ตามในเครื่องนี้"
+unlocks_tool = ""

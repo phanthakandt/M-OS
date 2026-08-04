@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/desktop/desktop_icon.gd" id="1"]
+
+[node name="DesktopIcon" type="VBoxContainer"]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 2
+mouse_filter = 1
+script = ExtResource("1")
+
+[node name="GlyphWrap" type="CenterContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="GlyphBox" type="Panel" parent="GlyphWrap"]
+custom_minimum_size = Vector2(13, 13)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Glyph" type="Label" parent="GlyphWrap/GlyphBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+mouse_filter = 2
+text = "Icon"
+horizontal_alignment = 1
+autowrap_mode = 2
