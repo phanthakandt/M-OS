@@ -50,11 +50,12 @@ func _open_file(file: FileData) -> void:
 	file_opened.emit(file)
 	if not window_manager:
 		return
+	# หมายเหตุ: DevCrack puzzle logic (unpack/repack/validation) ถูกถอดสายไว้ชั่วคราว
+	# ไฟล์ DevCrackApp.tscn / devcrack_app.gd ยังอยู่ในโปรเจกต์เหมือนเดิม แค่ยังไม่ถูกเรียกใช้
+	# เมื่อพร้อมทำเฟสปริศนา ให้เปลี่ยนโค้ดส่วนนี้กลับไปเป็นแบบเดิม
+	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
+	window_manager.open_window(content, "%s.%s" % [file.filename, file.extension], Rect2(60, 20, 180, 140))
 	if file.extension == "mos":
-		var content: DevCrackApp = DEVCRACK_SCENE.instantiate()
-		window_manager.open_window(content, "devcrack.exe", Rect2(70, 45, 200, 150))
-		content.unpack(file)
+		content.show_plain("[devcrack.exe — ยังไม่เปิดใช้งานในบิลด์นี้]")
 	else:
-		var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
-		window_manager.open_window(content, "%s.%s" % [file.filename, file.extension], Rect2(60, 20, 180, 140))
 		content.show_plain(file.content)

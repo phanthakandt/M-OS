@@ -1,7 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/desktop/Desktop.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 
 [node name="Main" type="Node"]
-
-[node name="Desktop" parent="." instance=ExtResource("1")]
+script = ExtResource("1")
