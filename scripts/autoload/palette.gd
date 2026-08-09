@@ -15,6 +15,8 @@ const TEXT_DIM := Color("#7d8b9a")
 const TEXT_FAINT := Color("#4d5a68")
 const ACCENT_WARN := Color("#a8484a")
 const ACCENT_WARN_DIM := Color("#6b3234")
+const ACCENT_MINIMIZE := Color("#a89448")
+const ACCENT_MAXIMIZE := Color("#4a8a5a")
 
 static func make_flat_style(bg: Color, border_color: Color, border_width: int = 1, margin: int = 0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -47,8 +49,8 @@ static func task_item_style() -> StyleBoxFlat:
 static func start_button_style() -> StyleBoxFlat:
 	return make_flat_style(WINDOW_BG, BORDER_LIGHT, 1, 6)
 
-static func tb_btn_style() -> StyleBoxFlat:
-	return make_flat_style(DESKTOP_BG_1, BORDER_LIGHT, 1)
+static func tb_btn_style_accent(accent: Color) -> StyleBoxFlat:
+	return make_flat_style(accent, BORDER, 1)
 
 static func blob_marked_style() -> StyleBoxFlat:
 	return make_flat_style(Color(ACCENT_WARN.r, ACCENT_WARN.g, ACCENT_WARN.b, 0.15), ACCENT_WARN, 1, 4)

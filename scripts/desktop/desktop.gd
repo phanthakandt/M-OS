@@ -13,6 +13,7 @@ const RULE_04 := preload("res://data/rules/rule_04.tres")
 @onready var window_layer: Control = $WindowLayer
 @onready var window_manager: WindowManager = $WindowManager
 @onready var my_pc_icon: DesktopIconUI = $IconGrid/MyPCIcon
+@onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
 @onready var start_button: Button = $Taskbar/Panel/HBox/StartButton
 @onready var open_windows_list: HBoxContainer = $Taskbar/Panel/HBox/OpenWindowsList
@@ -20,6 +21,7 @@ const RULE_04 := preload("res://data/rules/rule_04.tres")
 @onready var clock_timer: Timer = $ClockTimer
 
 var _task_items: Dictionary = {}
+var _work_area: Rect2 = Rect2()
 
 
 func _ready() -> void:
@@ -40,7 +42,9 @@ func _ready() -> void:
 	clock_label.add_theme_font_size_override("font_size", 6)
 	clock_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
 
+	_work_area = Rect2(Vector2.ZERO, window_layer.size - Vector2(0, taskbar.size.y))
 	window_manager.window_layer = window_layer
+	window_manager.work_area = _work_area
 	window_manager.window_opened.connect(_on_window_opened)
 	window_manager.window_closed.connect(_on_window_closed)
 
@@ -66,6 +70,7 @@ func _spawn_decorative_system_log() -> void:
 	var deco: AppWindow = WINDOW_SCENE.instantiate()
 	window_layer.add_child(deco)
 	deco.setup("SYSTEM.LOG", "sys_log_decor")
+	deco.work_area = _work_area
 	deco.position = Vector2(204, 23)
 	deco.size = Vector2(109, 70)
 	deco.modulate.a = 0.6
@@ -101,7 +106,7 @@ func _on_window_opened(window_id: String, title: String) -> void:
 	btn.text = title
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.clip_text = true
-	btn.custom_minimum_size = Vector2(0, 0)
+	btn.custom_minimum_size = Vector2(24, 0)
 	btn.add_theme_font_override("font", Palette.font_body)
 	btn.add_theme_font_size_override("font_size", 6)
 	btn.add_theme_color_override("font_color", Palette.TEXT_DIM)

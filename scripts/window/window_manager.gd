@@ -8,6 +8,7 @@ signal window_focus_changed(window_id: String)
 const WINDOW_SCENE := preload("res://scenes/window/Window.tscn")
 
 var window_layer: Control
+var work_area: Rect2 = Rect2()
 var _windows: Dictionary = {}
 var _next_id: int = 0
 var _active_id: String = ""
@@ -19,6 +20,7 @@ func open_window(content: Control, title: String, rect: Rect2) -> AppWindow:
 	var win: AppWindow = WINDOW_SCENE.instantiate()
 	window_layer.add_child(win)
 	win.setup(title, id)
+	win.work_area = work_area
 	win.position = rect.position
 	win.size = rect.size
 	win.closed.connect(_on_window_closed)
@@ -32,6 +34,13 @@ func open_window(content: Control, title: String, rect: Rect2) -> AppWindow:
 
 
 func focus_window(window_id: String) -> void:
+	if not _windows.has(window_id):
+		return
+	var win: AppWindow = _windows[window_id]
+	if win.visible and _active_id == window_id:
+		win.hide()
+		return
+	win.show()
 	_focus(window_id)
 
 

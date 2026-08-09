@@ -1,19 +1,17 @@
-[gd_resource type="Resource" script_class="FileData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="FileData" format=3 uid="uid://cexrg3wjo6gko"]
 
-[ext_resource type="Script" path="res://scripts/resources/file_data.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/resources/blob_data.gd" id="2"]
+[ext_resource type="Script" uid="uid://ckshu66iu2b5i" path="res://scripts/resources/file_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://b3epfjjjavbdb" path="res://scripts/resources/blob_data.gd" id="2"]
 
 [sub_resource type="Resource" id="blob1"]
 script = ExtResource("2")
 id = "core_shell"
 label = "core.shell  [runtime block]"
-should_remove = false
 
 [sub_resource type="Resource" id="blob2"]
 script = ExtResource("2")
 id = "core_index"
 label = "core.index  [runtime block]"
-should_remove = false
 
 [sub_resource type="Resource" id="blob3"]
 script = ExtResource("2")
@@ -27,8 +25,8 @@ filename = "_unnamed"
 extension = "mos"
 is_locked = true
 is_corrupted = true
-content = "ไฟล์นี้ไม่มีชื่อผู้ใช้บันทึกไว้ในประวัติการแก้ไข\n\n[ยังไม่มีเนื้อหาเพิ่มเติมในต้นแบบนี้]"
+content = "ไฟล์นี้ไม่มีชื่อผู้ใช้บันทึกไว้ในประวัติการแก้ไข
+
+[ยังไม่มีเนื้อหาเพิ่มเติมในต้นแบบนี้]"
 reveals_clue = "หมายเหตุระบบ: null.echo ไม่มีค่า timestamp เหมือน blob ตัวอื่นในไฟล์นี้"
 blobs = [SubResource("blob1"), SubResource("blob2"), SubResource("blob3")]
-last_modified_date = ""
-last_modified_by = ""

@@ -46,25 +46,22 @@ vertical_alignment = 1
 layout_mode = 2
 alignment = 2
 
-[node name="Btn1" type="Button" parent="Panel/VBox/TitleBar/HBox/Controls"]
+[node name="MinimizeButton" type="Button" parent="Panel/VBox/TitleBar/HBox/Controls"]
 custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_default_cursor_shape = 0
-flat = true
 
-[node name="Btn2" type="Button" parent="Panel/VBox/TitleBar/HBox/Controls"]
+[node name="MaximizeButton" type="Button" parent="Panel/VBox/TitleBar/HBox/Controls"]
 custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_default_cursor_shape = 0
-flat = true
 
 [node name="CloseButton" type="Button" parent="Panel/VBox/TitleBar/HBox/Controls"]
 custom_minimum_size = Vector2(4, 4)
 layout_mode = 2
 size_flags_vertical = 4
-flat = true
 
 [node name="ContentSlot" type="Control" parent="Panel/VBox"]
 layout_mode = 2
