@@ -21,6 +21,7 @@ should_remove = true
 
 [resource]
 script = ExtResource("1")
+id = "forbidden_file"
 filename = "_unnamed"
 extension = "mos"
 is_locked = true

@@ -4,7 +4,7 @@ extends VBoxContainer
 signal activated
 
 @export var glyph: String = "▭"
-@export var label_text: String = "Icon"
+@export var label_text: String = "drive"
 
 @onready var glyph_box: Panel = $GlyphWrap/GlyphBox
 @onready var glyph_label: Label = $GlyphWrap/GlyphBox/Glyph

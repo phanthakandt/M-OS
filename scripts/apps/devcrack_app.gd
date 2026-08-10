@@ -39,7 +39,7 @@ func unpack(file: FileData) -> void:
 	feedback_label.text = ""
 	_clear_blob_rows()
 
-	if file.is_repacked:
+	if GameState.is_repacked(file):
 		reveal_label.text = file.content
 		_show_state("reveal")
 		return
@@ -70,8 +70,7 @@ func repack() -> void:
 		return
 	var success := _validate_repack()
 	if success:
-		current_file.is_locked = false
-		current_file.is_repacked = true
+		GameState.mark_repacked(current_file)
 		GameState.has_learned_devcrack = true
 	else:
 		feedback_label.text = "ยังไม่ถูก ลองใหม่"

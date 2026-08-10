@@ -44,13 +44,13 @@ static func taskbar_style() -> StyleBoxFlat:
 	return style
 
 static func task_item_style() -> StyleBoxFlat:
-	return make_flat_style(WINDOW_BG, BORDER, 1, 4)
+	return make_flat_style(WINDOW_BG, BORDER, 1, 2)
 
 static func start_button_style() -> StyleBoxFlat:
-	return make_flat_style(WINDOW_BG, BORDER_LIGHT, 1, 6)
+	return make_flat_style(WINDOW_BG, BORDER_LIGHT, 1, 3)
 
 static func tb_btn_style_accent(accent: Color) -> StyleBoxFlat:
 	return make_flat_style(accent, BORDER, 1)
 
 static func blob_marked_style() -> StyleBoxFlat:
-	return make_flat_style(Color(ACCENT_WARN.r, ACCENT_WARN.g, ACCENT_WARN.b, 0.15), ACCENT_WARN, 1, 4)
+	return make_flat_style(Color(ACCENT_WARN.r, ACCENT_WARN.g, ACCENT_WARN.b, 0.15), ACCENT_WARN, 1, 2)

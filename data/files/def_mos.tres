@@ -16,6 +16,7 @@ should_remove = true
 
 [resource]
 script = ExtResource("1")
+id = "def_mos"
 filename = "def"
 extension = "mos"
 reveals_clue = "sys.watcher ไม่มี timestamp เหมือน blob ตัวอื่นในไฟล์นี้เลย"
