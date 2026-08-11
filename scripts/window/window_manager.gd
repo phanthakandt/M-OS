@@ -44,6 +44,36 @@ func focus_window(window_id: String) -> void:
 	_focus(window_id)
 
 
+## Shows and focuses a window without the toggle-minimize branch of
+## focus_window(). Use this for "open/bring to front" actions (desktop
+## icons, start menu, reopening an already-open file) — focus_window is
+## reserved for the taskbar button's intentional toggle-minimize behavior.
+func reveal_window(window_id: String) -> void:
+	if not _windows.has(window_id):
+		return
+	_windows[window_id].show()
+	_focus(window_id)
+
+
+func get_open_windows() -> Array:
+	var result: Array = []
+	for id in _windows:
+		var win: AppWindow = _windows[id]
+		result.append({"id": id, "title": win.window_title, "visible": win.visible})
+	return result
+
+
+## Closes a window the same way its own close button does — emits closed()
+## then frees it — so callers other than the titlebar (e.g. a task manager)
+## can terminate a window through the same path.
+func close_window(window_id: String) -> void:
+	if not _windows.has(window_id):
+		return
+	var win: AppWindow = _windows[window_id]
+	win.closed.emit(window_id)
+	win.queue_free()
+
+
 func _on_window_closed(window_id: String) -> void:
 	_windows.erase(window_id)
 	if _active_id == window_id:

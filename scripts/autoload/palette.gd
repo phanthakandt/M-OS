@@ -17,6 +17,8 @@ const ACCENT_WARN := Color("#a8484a")
 const ACCENT_WARN_DIM := Color("#6b3234")
 const ACCENT_MINIMIZE := Color("#a89448")
 const ACCENT_MAXIMIZE := Color("#4a8a5a")
+const SCRIM := Color(0, 0, 0, 0.55)
+const VOID := Color(0, 0, 0, 1)
 
 static func make_flat_style(bg: Color, border_color: Color, border_width: int = 1, margin: int = 0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()

@@ -2,6 +2,8 @@ extends Control
 
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const FILES_APP_SCENE := preload("res://scenes/apps/FilesApp.tscn")
+const CONFIRM_DIALOG_SCENE := preload("res://scenes/ui/ConfirmDialog.tscn")
+const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
 
 const RULE_01 := preload("res://data/rules/rule_01.tres")
 const RULE_02 := preload("res://data/rules/rule_02.tres")
@@ -12,6 +14,7 @@ const RULE_04 := preload("res://data/rules/rule_04.tres")
 @onready var window_layer: Control = $WindowLayer
 @onready var window_manager: WindowManager = $WindowManager
 @onready var drive_icon: DesktopIconUI = $IconGrid/DriveIcon
+@onready var readme_icon: DesktopIconUI = $IconGrid/ReadmeIcon
 @onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
 @onready var start_button: Button = $Taskbar/Panel/HBox/StartButton
@@ -26,6 +29,7 @@ var _start_menu_items: Array = []
 var _start_menu_layer: Control
 var _start_menu_panel: PanelContainer
 var _start_menu_scrim: Control
+var _confirm_dialog: ConfirmDialog
 
 ## Single-instance app windows opened from the desktop shell (icons, start
 ## menu), keyed by an arbitrary app key -> window_id. Reopening a key focuses
@@ -58,15 +62,24 @@ func _ready() -> void:
 	window_manager.window_opened.connect(_on_window_opened)
 	window_manager.window_closed.connect(_on_window_closed)
 
-	drive_icon.glyph = "▤"
-	drive_icon.label_text = "drive"
+	drive_icon.configure("D", "drive")
 	drive_icon.activated.connect(_open_files_app)
 
+	readme_icon.configure("txt", "readme.txt")
+	readme_icon.activated.connect(_open_readme)
+
 	_start_menu_items = [
-		{"label": "SYSTEM.LOG", "action": Callable(self, "_open_system_log")},
+		{"label": "my drive", "action": Callable(self, "_open_files_app")},
+		{"label": "system log", "action": Callable(self, "_open_system_log")},
+		{"label": "task manager", "action": Callable(self, "_open_task_manager")},
+		{"label": "restart", "action": Callable(self, "_restart_os")},
+		{"label": "logout", "action": Callable(self, "_logout")},
+		{"label": "shutdown", "action": Callable(self, "_confirm_shutdown")},
 	]
 	_build_start_menu()
-	_open_readme()
+
+	_confirm_dialog = CONFIRM_DIALOG_SCENE.instantiate()
+	add_child(_confirm_dialog)
 
 	clock_timer.wait_time = 1.0
 	clock_timer.timeout.connect(_update_clock)
@@ -80,11 +93,14 @@ func _update_clock() -> void:
 
 
 func _open_readme() -> void:
+	if _focus_if_open("readme"):
+		return
+
 	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
-	window_manager.open_window(content, "READ_BEFORE_PROCEEDING.txt", Rect2(134, 29, 128, 147))
+	var win := window_manager.open_window(content, "README.txt", Rect2(134, 29, 128, 147))
+	_singleton_windows["readme"] = win.window_id
 	content.show_warning_and_rules(
-		"คำเตือน: อย่าพยายามลบ M-OS",
-		"ให้ทำตามขั้นตอนต่อไปนี้อย่างเคร่งครัด",
+		"คำเตือน: นี่คือขั้นตอนการ Factory Restore M-OS กรุณาทำตามขั้นตอนต่อไปนี้อย่างเคร่งครัด",
 		[RULE_01, RULE_02, RULE_03, RULE_04]
 	)
 
@@ -101,7 +117,7 @@ func _open_files_app() -> void:
 func _focus_if_open(key: String) -> bool:
 	if not _singleton_windows.has(key):
 		return false
-	window_manager.focus_window(_singleton_windows[key])
+	window_manager.reveal_window(_singleton_windows[key])
 	return true
 
 
@@ -154,7 +170,7 @@ func _build_start_menu() -> void:
 	_start_menu_layer.add_child(_start_menu_panel)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 3)
+	vbox.add_theme_constant_override("separation", -1)
 	_start_menu_panel.add_child(vbox)
 
 	for item in _start_menu_items:
@@ -219,3 +235,52 @@ func _open_system_log() -> void:
 
 	var win := window_manager.open_window(content, "SYSTEM.LOG", Rect2(204, 23, 109, 70))
 	_singleton_windows["sys_log"] = win.window_id
+
+
+func _open_task_manager() -> void:
+	if _focus_if_open("task_mgr"):
+		return
+
+	var content: TaskManagerApp = TASK_MANAGER_SCENE.instantiate()
+	content.window_manager = window_manager
+	var win := window_manager.open_window(content, "task manager", Rect2(70, 40, 150, 120))
+	_singleton_windows["task_mgr"] = win.window_id
+	content.self_window_id = win.window_id
+	content.refresh_list()
+
+
+## -- Power actions -------------------------------------------------------
+
+func _restart_os() -> void:
+	GameState.reset_progress()
+	get_tree().reload_current_scene()
+
+
+func _logout() -> void:
+	GameState.reset_progress()
+	get_tree().reload_current_scene()
+
+
+func _confirm_shutdown() -> void:
+	if not _confirm_dialog.confirmed.is_connected(_do_shutdown):
+		_confirm_dialog.confirmed.connect(_do_shutdown, CONNECT_ONE_SHOT)
+	_confirm_dialog.ask("ต้องการปิดระบบ M-OS?")
+
+
+func _do_shutdown() -> void:
+	var overlay := ColorRect.new()
+	overlay.color = Palette.VOID
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+
+	var label := Label.new()
+	label.text = "M-OS: process terminated"
+	label.add_theme_font_override("font", Palette.font_chrome)
+	label.add_theme_font_size_override("font_size", 5)
+	label.add_theme_color_override("font_color", Palette.TEXT_MAIN)
+	label.set_anchors_preset(Control.PRESET_CENTER)
+	overlay.add_child(label)
+
+	await get_tree().create_timer(1.5).timeout
+	get_tree().quit()

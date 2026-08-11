@@ -197,7 +197,7 @@ func _open_file(file: FileData) -> void:
 
 	var key := _file_window_key(file)
 	if _open_file_windows.has(key):
-		window_manager.focus_window(_open_file_windows[key])
+		window_manager.reveal_window(_open_file_windows[key])
 		return
 
 	# หมายเหตุ: DevCrack puzzle logic (unpack/repack/validation) ถูกถอดสายไว้ชั่วคราว

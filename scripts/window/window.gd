@@ -5,6 +5,7 @@ signal closed(window_id: String)
 signal focused(window_id: String)
 
 var window_id: String = ""
+var window_title: String = ""
 var work_area: Rect2 = Rect2()
 
 var _is_maximized: bool = false
@@ -44,6 +45,7 @@ func _ready() -> void:
 
 func setup(title: String, id: String) -> void:
 	window_id = id
+	window_title = title
 	title_label.text = title
 
 
