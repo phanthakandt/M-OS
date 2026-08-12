@@ -3,9 +3,10 @@ extends Control
 
 signal file_opened(file_data: FileData)
 
-const DRIVE_C := preload("res://data/drive_c.tres")
+const DRIVE := preload("res://data/drive.tres")
 const DEVCRACK_SCENE := preload("res://scenes/apps/DevCrackApp.tscn")
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
+const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 
 var window_manager: WindowManager
 
@@ -19,11 +20,19 @@ var _show_hidden: bool = false
 ## reopening the same file focuses its existing window instead of duplicating it.
 var _open_file_windows: Dictionary = {}
 
+## Whichever row's context menu is currently open — exactly one of the two
+## is set at a time — so _on_context_item_selected knows what "Open"/"Delete"
+## should act on.
+var _context_target_file: FileData
+var _context_target_folder: FolderData
+var _notice_label: Label
+
 @onready var back_button: Button = $VBox/NavBar/BackButton
 @onready var forward_button: Button = $VBox/NavBar/ForwardButton
 @onready var header_label: Label = $VBox/NavBar/HeaderLabel
 @onready var hidden_toggle_button: Button = $VBox/NavBar/HiddenToggleButton
 @onready var list: VBoxContainer = $VBox/Scroll/List
+@onready var _context_menu: ContextMenu = CONTEXT_MENU_SCENE.instantiate()
 
 
 func _ready() -> void:
@@ -50,7 +59,10 @@ func _ready() -> void:
 	if window_manager:
 		window_manager.window_closed.connect(_on_window_closed)
 
-	_history = [[DRIVE_C]]
+	add_child(_context_menu)
+	_context_menu.item_selected.connect(_on_context_item_selected)
+
+	_history = [[DRIVE]]
 	_history_index = 0
 	_rebuild_list()
 
@@ -131,10 +143,14 @@ func _rebuild_list() -> void:
 	for subfolder in current.subfolders:
 		if subfolder.is_hidden and not _show_hidden:
 			continue
+		if GameState.is_folder_deleted(subfolder):
+			continue
 		_add_folder_row(subfolder)
 
 	for file in current.files:
 		if file.is_hidden and not _show_hidden:
+			continue
+		if GameState.is_file_deleted(file):
 			continue
 		_add_file_row(file)
 
@@ -181,18 +197,57 @@ func _make_row(text: String, color: Color) -> Button:
 
 
 func _on_folder_row_gui_input(event: InputEvent, folder: FolderData) -> void:
-	if event is InputEventMouseButton and event.pressed and event.double_click:
+	if not (event is InputEventMouseButton and event.pressed):
+		return
+	if event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
 		_enter_folder(folder)
+	elif event.button_index == MOUSE_BUTTON_RIGHT:
+		_context_target_folder = folder
+		_context_target_file = null
+		var items: Array = [{"label": "Open", "action": "open"}]
+		if GameState.can_delete_folder(folder):
+			items.append({"label": "Delete", "action": "delete"})
+		_context_menu.open_at(get_global_mouse_position(), items)
 
 
 func _on_file_row_gui_input(event: InputEvent, file: FileData) -> void:
-	if event is InputEventMouseButton and event.pressed and event.double_click:
+	if not (event is InputEventMouseButton and event.pressed):
+		return
+	if event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
 		_open_file(file)
+	elif event.button_index == MOUSE_BUTTON_RIGHT:
+		_context_target_file = file
+		_context_target_folder = null
+		var items: Array = [{"label": "Open", "action": "open"}]
+		if GameState.can_delete_file(file):
+			items.append({"label": "Delete", "action": "delete"})
+		_context_menu.open_at(get_global_mouse_position(), items)
+
+
+func _on_context_item_selected(action: String) -> void:
+	if _context_target_file:
+		var file := _context_target_file
+		if action == "open":
+			_open_file(file)
+		elif action == "delete":
+			GameState.delete_file(file)
+			_rebuild_list()
+	elif _context_target_folder:
+		var folder := _context_target_folder
+		if action == "open":
+			_enter_folder(folder)
+		elif action == "delete":
+			GameState.delete_folder(folder)
+			_rebuild_list()
 
 
 func _open_file(file: FileData) -> void:
 	file_opened.emit(file)
 	if not window_manager:
+		return
+
+	if file.extension == "mos":
+		_show_notice("ไม่สามารถเปิดไฟล์นี้ได้")
 		return
 
 	var key := _file_window_key(file)
@@ -206,10 +261,26 @@ func _open_file(file: FileData) -> void:
 	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
 	var win := window_manager.open_window(content, "%s.%s" % [file.filename, file.extension], Rect2(60, 20, 180, 140))
 	_open_file_windows[key] = win.window_id
-	if file.extension == "mos":
-		content.show_plain("[devcrack.exe — ยังไม่เปิดใช้งานในบิลด์นี้]")
-	else:
-		content.show_plain(file.content)
+	content.show_plain(file.content)
+
+
+func _show_notice(text: String) -> void:
+	if is_instance_valid(_notice_label):
+		_notice_label.queue_free()
+
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_override("font", Palette.font_body)
+	lbl.add_theme_font_size_override("font_size", 5)
+	lbl.add_theme_color_override("font_color", Palette.ACCENT_WARN)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	add_child(lbl)
+	_notice_label = lbl
+
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(lbl):
+		lbl.queue_free()
 
 
 func _file_window_key(file: FileData) -> String:

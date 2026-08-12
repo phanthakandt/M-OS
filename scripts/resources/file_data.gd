@@ -6,6 +6,7 @@ extends Resource
 @export var extension: String
 @export var is_locked: bool = false
 @export var is_hidden: bool = false
+@export var is_protected: bool = false
 @export var is_corrupted: bool = false
 @export var content: String
 @export var reveals_clue: String

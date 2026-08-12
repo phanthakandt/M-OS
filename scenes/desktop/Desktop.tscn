@@ -34,6 +34,8 @@ theme_override_constants/separation = 7
 
 [node name="ReadmeIcon" parent="IconGrid" unique_id=368278350 instance=ExtResource("3")]
 
+[node name="TrashIcon" parent="IconGrid" unique_id=421827127 instance=ExtResource("3")]
+
 [node name="WindowLayer" type="Control" parent="." unique_id=2139230364]
 layout_mode = 1
 anchors_preset = 15

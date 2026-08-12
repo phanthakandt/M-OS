@@ -3,7 +3,9 @@ extends Control
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const FILES_APP_SCENE := preload("res://scenes/apps/FilesApp.tscn")
 const CONFIRM_DIALOG_SCENE := preload("res://scenes/ui/ConfirmDialog.tscn")
+const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
+const TRASH_APP_SCENE := preload("res://scenes/apps/TrashApp.tscn")
 
 const RULE_01 := preload("res://data/rules/rule_01.tres")
 const RULE_02 := preload("res://data/rules/rule_02.tres")
@@ -15,6 +17,7 @@ const RULE_04 := preload("res://data/rules/rule_04.tres")
 @onready var window_manager: WindowManager = $WindowManager
 @onready var drive_icon: DesktopIconUI = $IconGrid/DriveIcon
 @onready var readme_icon: DesktopIconUI = $IconGrid/ReadmeIcon
+@onready var trash_icon: DesktopIconUI = $IconGrid/TrashIcon
 @onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
 @onready var start_button: Button = $Taskbar/Panel/HBox/StartButton
@@ -30,6 +33,14 @@ var _start_menu_layer: Control
 var _start_menu_panel: PanelContainer
 var _start_menu_scrim: Control
 var _confirm_dialog: ConfirmDialog
+var _context_menu: ContextMenu
+
+## The desktop icon's own open/delete actions, remembered between showing
+## its right-click menu and the player picking an item from it.
+## _context_target_delete_action is left invalid for icons with no delete
+## option (see _wire_icon).
+var _context_target_open_action: Callable
+var _context_target_delete_action: Callable
 
 ## Single-instance app windows opened from the desktop shell (icons, start
 ## menu), keyed by an arbitrary app key -> window_id. Reopening a key focuses
@@ -62,14 +73,16 @@ func _ready() -> void:
 	window_manager.window_opened.connect(_on_window_opened)
 	window_manager.window_closed.connect(_on_window_closed)
 
-	drive_icon.configure("D", "drive")
-	drive_icon.activated.connect(_open_files_app)
+	_wire_icon(drive_icon, "D", "drive", Callable(self, "_open_files_app"))
+	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"))
+	_wire_icon(trash_icon, "X", "trash", Callable(self, "_open_trash_app"))
 
-	readme_icon.configure("txt", "readme.txt")
-	readme_icon.activated.connect(_open_readme)
+	if GameState.is_readme_deleted():
+		readme_icon.visible = false
 
 	_start_menu_items = [
 		{"label": "my drive", "action": Callable(self, "_open_files_app")},
+		{"label": "trash", "action": Callable(self, "_open_trash_app")},
 		{"label": "system log", "action": Callable(self, "_open_system_log")},
 		{"label": "task manager", "action": Callable(self, "_open_task_manager")},
 		{"label": "restart", "action": Callable(self, "_restart_os")},
@@ -80,6 +93,10 @@ func _ready() -> void:
 
 	_confirm_dialog = CONFIRM_DIALOG_SCENE.instantiate()
 	add_child(_confirm_dialog)
+
+	_context_menu = CONTEXT_MENU_SCENE.instantiate()
+	add_child(_context_menu)
+	_context_menu.item_selected.connect(_on_icon_context_item_selected)
 
 	clock_timer.wait_time = 1.0
 	clock_timer.timeout.connect(_update_clock)
@@ -119,6 +136,38 @@ func _focus_if_open(key: String) -> bool:
 		return false
 	window_manager.reveal_window(_singleton_windows[key])
 	return true
+
+
+## Most desktop icons (drive, trash) are apps with no FileData/FolderData
+## behind them, so their right-click menu only ever offers "Open" — pass
+## delete_action for icons that represent an actual file (currently just
+## readme.txt) to also offer "Delete".
+func _wire_icon(icon: DesktopIconUI, glyph: String, label: String, open_action: Callable, delete_action: Callable = Callable()) -> void:
+	icon.configure(glyph, label)
+	icon.activated.connect(open_action)
+	icon.context_requested.connect(_show_icon_context_menu.bind(open_action, delete_action))
+
+
+func _show_icon_context_menu(open_action: Callable, delete_action: Callable) -> void:
+	_context_target_open_action = open_action
+	_context_target_delete_action = delete_action
+
+	var items: Array = [{"label": "Open", "action": "open"}]
+	if delete_action.is_valid():
+		items.append({"label": "Delete", "action": "delete"})
+	_context_menu.open_at(get_global_mouse_position(), items)
+
+
+func _on_icon_context_item_selected(action: String) -> void:
+	if action == "open" and _context_target_open_action.is_valid():
+		_context_target_open_action.call()
+	elif action == "delete" and _context_target_delete_action.is_valid():
+		_context_target_delete_action.call()
+
+
+func _delete_readme() -> void:
+	GameState.delete_readme()
+	readme_icon.visible = false
 
 
 func _on_window_opened(window_id: String, title: String) -> void:
@@ -247,6 +296,15 @@ func _open_task_manager() -> void:
 	_singleton_windows["task_mgr"] = win.window_id
 	content.self_window_id = win.window_id
 	content.refresh_list()
+
+
+func _open_trash_app() -> void:
+	if _focus_if_open("trash"):
+		return
+
+	var content: TrashApp = TRASH_APP_SCENE.instantiate()
+	var win := window_manager.open_window(content, "trash", Rect2(90, 45, 150, 120))
+	_singleton_windows["trash"] = win.window_id
 
 
 ## -- Power actions -------------------------------------------------------

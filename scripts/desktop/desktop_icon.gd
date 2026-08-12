@@ -2,6 +2,7 @@ class_name DesktopIconUI
 extends VBoxContainer
 
 signal activated
+signal context_requested
 
 @export var glyph: String = ""
 @export var label_text: String = ""
@@ -39,5 +40,9 @@ func configure(new_glyph: String, new_label_text: String) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.double_click:
+	if not (event is InputEventMouseButton and event.pressed):
+		return
+	if event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
 		activated.emit()
+	elif event.button_index == MOUSE_BUTTON_RIGHT:
+		context_requested.emit()

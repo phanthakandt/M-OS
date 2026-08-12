@@ -15,7 +15,7 @@ func _ready() -> void:
 
 
 func show_warning_and_rules(warning_title: String, rules: Array) -> void:
-	var bb := "[color=#FF0000]%s[/color]\n\n" % [warning_title]
+	var bb := "[color=#a8484a]%s[/color]\n\n" % [warning_title]
 	for rule in rules:
 		bb += "[font=%s][color=#cdd8e2]%02d[/color][/font]\n[color=#7d8b9a]%s[/color]\n\n" % [CHROME_FONT_PATH, rule.rule_number, rule.text]
 	rich_text.text = bb
