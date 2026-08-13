@@ -9,7 +9,6 @@ extends Resource
 @export var is_protected: bool = false
 @export var is_corrupted: bool = false
 @export var content: String
-@export var reveals_clue: String
 @export var blobs: Array = []
 @export var last_modified_date: String
 @export var last_modified_by: String

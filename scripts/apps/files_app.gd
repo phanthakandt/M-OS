@@ -20,6 +20,11 @@ var _show_hidden: bool = false
 ## reopening the same file focuses its existing window instead of duplicating it.
 var _open_file_windows: Dictionary = {}
 
+## Same idea as _open_file_windows, but for DevCrack windows — kept separate
+## since a file can have both an open NoteViewer and an open DevCrack window
+## at once, each tracked independently.
+var _devcrack_windows: Dictionary = {}
+
 ## Whichever row's context menu is currently open — exactly one of the two
 ## is set at a time — so _on_context_item_selected knows what "Open"/"Delete"
 ## should act on.
@@ -58,6 +63,8 @@ func _ready() -> void:
 
 	if window_manager:
 		window_manager.window_closed.connect(_on_window_closed)
+
+	GameState.trashed_changed.connect(_rebuild_list)
 
 	add_child(_context_menu)
 	_context_menu.item_selected.connect(_on_context_item_selected)
@@ -219,6 +226,7 @@ func _on_file_row_gui_input(event: InputEvent, file: FileData) -> void:
 		_context_target_file = file
 		_context_target_folder = null
 		var items: Array = [{"label": "Open", "action": "open"}]
+		items.append({"label": "Unpack through DevCrack", "action": "unpack"})
 		if GameState.can_delete_file(file):
 			items.append({"label": "Delete", "action": "delete"})
 		_context_menu.open_at(get_global_mouse_position(), items)
@@ -229,16 +237,33 @@ func _on_context_item_selected(action: String) -> void:
 		var file := _context_target_file
 		if action == "open":
 			_open_file(file)
+		elif action == "unpack":
+			_open_devcrack(file)
 		elif action == "delete":
 			GameState.delete_file(file)
-			_rebuild_list()
+			var key := _file_window_key(file)
+			if _open_file_windows.has(key):
+				window_manager.close_window(_open_file_windows[key])
 	elif _context_target_folder:
 		var folder := _context_target_folder
 		if action == "open":
 			_enter_folder(folder)
 		elif action == "delete":
 			GameState.delete_folder(folder)
-			_rebuild_list()
+			_close_open_windows_under(folder)
+
+
+## Deleting a folder trashes it as one entry (see GameState.delete_folder) —
+## its contents are never individually walked for that — but any windows
+## already open on files inside it would otherwise dangle, so this walks
+## the (now-trashed) subtree just to close those.
+func _close_open_windows_under(folder: FolderData) -> void:
+	for file in folder.files:
+		var key := _file_window_key(file)
+		if _open_file_windows.has(key):
+			window_manager.close_window(_open_file_windows[key])
+	for subfolder in folder.subfolders:
+		_close_open_windows_under(subfolder)
 
 
 func _open_file(file: FileData) -> void:
@@ -246,8 +271,8 @@ func _open_file(file: FileData) -> void:
 	if not window_manager:
 		return
 
-	if file.extension == "mos":
-		_show_notice("ไม่สามารถเปิดไฟล์นี้ได้")
+	if GameState.is_locked(file):
+		_show_notice("ไม่สามารถเปิดไฟล์นี้ได้ — ลองคลิกขวา > Unpack through DevCrack")
 		return
 
 	var key := _file_window_key(file)
@@ -255,13 +280,28 @@ func _open_file(file: FileData) -> void:
 		window_manager.reveal_window(_open_file_windows[key])
 		return
 
-	# หมายเหตุ: DevCrack puzzle logic (unpack/repack/validation) ถูกถอดสายไว้ชั่วคราว
-	# ไฟล์ DevCrackApp.tscn / devcrack_app.gd ยังอยู่ในโปรเจกต์เหมือนเดิม แค่ยังไม่ถูกเรียกใช้
-	# เมื่อพร้อมทำเฟสปริศนา ให้เปลี่ยนโค้ดส่วนนี้กลับไปเป็นแบบเดิม
 	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
 	var win := window_manager.open_window(content, "%s.%s" % [file.filename, file.extension], Rect2(60, 20, 180, 140))
 	_open_file_windows[key] = win.window_id
 	content.show_plain(file.content)
+
+
+func _open_devcrack(file: FileData) -> void:
+	if not window_manager:
+		return
+
+	var key := _file_window_key(file)
+	if _devcrack_windows.has(key):
+		window_manager.reveal_window(_devcrack_windows[key])
+		return
+
+	var content: DevCrackApp = DEVCRACK_SCENE.instantiate()
+	var win := window_manager.open_window(
+		content, "devcrack — %s.%s" % [file.filename, file.extension],
+		Rect2(50, 20, 190, 150)
+	)
+	_devcrack_windows[key] = win.window_id
+	content.unpack(file)
 
 
 func _show_notice(text: String) -> void:
@@ -291,4 +331,8 @@ func _on_window_closed(window_id: String) -> void:
 	for key in _open_file_windows.keys():
 		if _open_file_windows[key] == window_id:
 			_open_file_windows.erase(key)
+			break
+	for key in _devcrack_windows.keys():
+		if _devcrack_windows[key] == window_id:
+			_devcrack_windows.erase(key)
 			break

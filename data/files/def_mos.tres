@@ -11,13 +11,14 @@ label = "meta.tag  [identity block]"
 [sub_resource type="Resource" id="blob2"]
 script = ExtResource("2")
 id = "sys_watcher"
-label = "sys.watcher  [background hook]"
 should_remove = true
+filename = "data"
+extension = "protected"
 
 [resource]
 script = ExtResource("1")
 id = "def_mos"
 filename = "def"
 extension = "mos"
-reveals_clue = "sys.watcher ไม่มี timestamp เหมือน blob ตัวอื่นในไฟล์นี้เลย"
+is_locked = true
 blobs = [SubResource("blob1"), SubResource("blob2")]

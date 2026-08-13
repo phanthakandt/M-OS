@@ -16,8 +16,9 @@ label = "core.index  [runtime block]"
 [sub_resource type="Resource" id="blob3"]
 script = ExtResource("2")
 id = "null_echo"
-label = "null.echo  [unindexed block]"
 should_remove = true
+filename = "data"
+extension = "protected"
 
 [resource]
 script = ExtResource("1")
@@ -25,9 +26,9 @@ id = "forbidden_file"
 filename = "_unnamed"
 extension = "mos"
 is_locked = true
+is_protected = true
 is_corrupted = true
 content = "ไฟล์นี้ไม่มีชื่อผู้ใช้บันทึกไว้ในประวัติการแก้ไข
 
 [ยังไม่มีเนื้อหาเพิ่มเติมในต้นแบบนี้]"
-reveals_clue = "หมายเหตุระบบ: null.echo ไม่มีค่า timestamp เหมือน blob ตัวอื่นในไฟล์นี้"
 blobs = [SubResource("blob1"), SubResource("blob2"), SubResource("blob3")]

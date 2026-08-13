@@ -77,8 +77,8 @@ func _ready() -> void:
 	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"))
 	_wire_icon(trash_icon, "X", "trash", Callable(self, "_open_trash_app"))
 
-	if GameState.is_readme_deleted():
-		readme_icon.visible = false
+	readme_icon.visible = not GameState.is_readme_deleted()
+	GameState.trashed_changed.connect(_on_trashed_changed)
 
 	_start_menu_items = [
 		{"label": "my drive", "action": Callable(self, "_open_files_app")},
@@ -167,7 +167,15 @@ func _on_icon_context_item_selected(action: String) -> void:
 
 func _delete_readme() -> void:
 	GameState.delete_readme()
-	readme_icon.visible = false
+	if _singleton_windows.has("readme"):
+		window_manager.close_window(_singleton_windows["readme"])
+
+
+## GameState.trashed_changed also fires for file/folder trash in FilesApp,
+## which readme_icon doesn't care about — re-deriving visibility from
+## is_readme_deleted() every time is simpler than a readme-specific signal.
+func _on_trashed_changed() -> void:
+	readme_icon.visible = not GameState.is_readme_deleted()
 
 
 func _on_window_opened(window_id: String, title: String) -> void:

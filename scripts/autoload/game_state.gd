@@ -2,13 +2,10 @@ extends Node
 
 signal trashed_changed
 
-var has_learned_devcrack: bool = false
-
 ## Runtime progress, keyed by FileData.id (falls back to resource_path).
 ## Never mutate FileData resources directly — preloaded resources are cached
 ## singletons for the process's lifetime, so in-place mutation would leak
 ## across sessions/new games.
-var repacked_files: Dictionary = {}
 var unlocked_files: Dictionary = {}
 
 ## Runtime "trash": entries the player has deleted, tracked here rather than
@@ -22,6 +19,12 @@ var _trashed_folders: Dictionary = {}
 ## FileData resource in the drive tree), so it gets its own flag here rather
 ## than an entry in _trashed_files.
 var _readme_deleted: bool = false
+
+## DevCrack archive-entry on/off state, keyed by file_key -> {entry_id: true}
+## meaning "currently disabled". A toggle, not a one-way flag — re-enabling a
+## should_remove entry re-locks the file (see is_locked()). Session state
+## only — never mutates BlobData/FileData.
+var _disabled_archive_entries: Dictionary = {}
 
 
 func _file_key(file: FileData) -> String:
@@ -77,6 +80,22 @@ func get_trashed_folders() -> Array:
 	return _trashed_folders.values()
 
 
+## Restore has no protected/undeletable equivalent — anything that was
+## successfully trashed can always be restored.
+func restore_file(file: FileData) -> void:
+	var key := _file_key(file)
+	if _trashed_files.has(key):
+		_trashed_files.erase(key)
+		trashed_changed.emit()
+
+
+func restore_folder(folder: FolderData) -> void:
+	var key := _folder_key(folder)
+	if _trashed_folders.has(key):
+		_trashed_folders.erase(key)
+		trashed_changed.emit()
+
+
 func is_readme_deleted() -> bool:
 	return _readme_deleted
 
@@ -86,16 +105,26 @@ func delete_readme() -> void:
 	trashed_changed.emit()
 
 
-func is_repacked(file: FileData) -> bool:
-	return repacked_files.get(_file_key(file), false)
+func restore_readme() -> void:
+	if _readme_deleted:
+		_readme_deleted = false
+		trashed_changed.emit()
+
+
+func is_archive_entry_disabled(file: FileData, entry_id: String) -> bool:
+	var key := _file_key(file)
+	return _disabled_archive_entries.get(key, {}).get(entry_id, false)
+
+
+func set_archive_entry_disabled(file: FileData, entry_id: String, disabled: bool) -> void:
+	var key := _file_key(file)
+	if not _disabled_archive_entries.has(key):
+		_disabled_archive_entries[key] = {}
+	_disabled_archive_entries[key][entry_id] = disabled
 
 
 func is_unlocked(file: FileData) -> bool:
 	return unlocked_files.get(_file_key(file), false)
-
-
-func mark_repacked(file: FileData) -> void:
-	repacked_files[_file_key(file)] = true
 
 
 func mark_unlocked(file: FileData) -> void:
@@ -103,15 +132,22 @@ func mark_unlocked(file: FileData) -> void:
 
 
 ## Effective lock state: initial data (FileData.is_locked) combined with
-## session progress. FileData.is_locked itself is never mutated.
+## whether every should_remove archive entry on the file is currently
+## disabled — this is computed live, not a one-way flag, so re-enabling a
+## should_remove entry re-locks the file. FileData.is_locked itself is never
+## mutated.
 func is_locked(file: FileData) -> bool:
-	return file.is_locked and not is_repacked(file) and not is_unlocked(file)
+	if not file.is_locked or is_unlocked(file):
+		return false
+	for blob in file.blobs:
+		if blob.should_remove and not is_archive_entry_disabled(file, blob.id):
+			return true
+	return false
 
 
 func reset_progress() -> void:
-	has_learned_devcrack = false
-	repacked_files.clear()
 	unlocked_files.clear()
 	_trashed_files.clear()
 	_trashed_folders.clear()
 	_readme_deleted = false
+	_disabled_archive_entries.clear()
