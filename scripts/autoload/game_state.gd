@@ -131,18 +131,37 @@ func mark_unlocked(file: FileData) -> void:
 	unlocked_files[_file_key(file)] = true
 
 
-## Effective lock state: initial data (FileData.is_locked) combined with
-## whether every should_remove archive entry on the file is currently
-## disabled — this is computed live, not a one-way flag, so re-enabling a
-## should_remove entry re-locks the file. FileData.is_locked itself is never
-## mutated.
-func is_locked(file: FileData) -> bool:
+enum LockReason { UNLOCKED, PROTECTED, CORRUPTED }
+
+## Computes *why* a file is locked, not just whether. PROTECTED means a
+## should_remove entry (e.g. data.protected) is still enabled — the
+## intended block. CORRUPTED means a non-should_remove entry (essential
+## data) has been disabled — an unintended, self-inflicted break. Both
+## are reversible: re-enabling the relevant entry clears that condition,
+## same as everything else in this dictionary-backed session state.
+func get_lock_reason(file: FileData) -> int:
 	if not file.is_locked or is_unlocked(file):
-		return false
+		return LockReason.UNLOCKED
+	var corrupted := false
+	var protected_active := false
 	for blob in file.blobs:
-		if blob.should_remove and not is_archive_entry_disabled(file, blob.id):
-			return true
-	return false
+		var disabled := is_archive_entry_disabled(file, blob.id)
+		if blob.should_remove and not disabled:
+			protected_active = true
+		elif not blob.should_remove and disabled:
+			corrupted = true
+	if corrupted:
+		return LockReason.CORRUPTED
+	if protected_active:
+		return LockReason.PROTECTED
+	return LockReason.UNLOCKED
+
+
+## Effective lock state: initial data (FileData.is_locked) combined with
+## live archive-entry disabled state (see get_lock_reason()). FileData.is_locked
+## itself is never mutated.
+func is_locked(file: FileData) -> bool:
+	return get_lock_reason(file) != LockReason.UNLOCKED
 
 
 func reset_progress() -> void:

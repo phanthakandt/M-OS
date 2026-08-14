@@ -3,6 +3,7 @@ extends Control
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const FILES_APP_SCENE := preload("res://scenes/apps/FilesApp.tscn")
 const CONFIRM_DIALOG_SCENE := preload("res://scenes/ui/ConfirmDialog.tscn")
+const WARNING_DIALOG_SCENE := preload("res://scenes/ui/WarningDialog.tscn")
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
 const TRASH_APP_SCENE := preload("res://scenes/apps/TrashApp.tscn")
@@ -33,6 +34,7 @@ var _start_menu_layer: Control
 var _start_menu_panel: PanelContainer
 var _start_menu_scrim: Control
 var _confirm_dialog: ConfirmDialog
+var _warning_dialog: WarningDialog
 var _context_menu: ContextMenu
 
 ## The desktop icon's own open/delete actions, remembered between showing
@@ -94,6 +96,9 @@ func _ready() -> void:
 	_confirm_dialog = CONFIRM_DIALOG_SCENE.instantiate()
 	add_child(_confirm_dialog)
 
+	_warning_dialog = WARNING_DIALOG_SCENE.instantiate()
+	add_child(_warning_dialog)
+
 	_context_menu = CONTEXT_MENU_SCENE.instantiate()
 	add_child(_context_menu)
 	_context_menu.item_selected.connect(_on_icon_context_item_selected)
@@ -127,6 +132,7 @@ func _open_files_app() -> void:
 		return
 	var content: FilesApp = FILES_APP_SCENE.instantiate()
 	content.window_manager = window_manager
+	content.warning_dialog = _warning_dialog
 	var win := window_manager.open_window(content, "drive", Rect2(40, 30, 160, 140))
 	_singleton_windows["drive"] = win.window_id
 

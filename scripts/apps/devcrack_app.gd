@@ -6,12 +6,13 @@ signal file_repacked(file_data: FileData, unlocked: bool)
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 
 var current_file: FileData
+var warning_dialog: WarningDialog
+var window_manager: WindowManager
+var self_window_id: String = ""
 var _context_target_blob: BlobData
-var _notice_label: Label
 
 @onready var header_label: Label = $VBox/HeaderLabel
 @onready var list: VBoxContainer = $VBox/Scroll/List
-@onready var feedback_label: Label = $VBox/FeedbackLabel
 @onready var repack_button: Button = $VBox/BottomBar/RepackButton
 @onready var _context_menu: ContextMenu = CONTEXT_MENU_SCENE.instantiate()
 
@@ -20,10 +21,6 @@ func _ready() -> void:
 	header_label.add_theme_font_override("font", Palette.font_chrome)
 	header_label.add_theme_font_size_override("font_size", 5)
 	header_label.add_theme_color_override("font_color", Palette.TEXT_MAIN)
-
-	feedback_label.add_theme_font_override("font", Palette.font_body)
-	feedback_label.add_theme_font_size_override("font_size", 6)
-	feedback_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
 
 	repack_button.text = "REPACK"
 	repack_button.focus_mode = Control.FOCUS_NONE
@@ -48,7 +45,6 @@ func _ready() -> void:
 ## respects GameState.is_locked(file).
 func unpack(file: FileData) -> void:
 	current_file = file
-	feedback_label.text = ""
 	header_label.text = "%s.%s" % [file.filename, file.extension]
 	_rebuild_entry_list()
 	_show_state("unpack")
@@ -126,47 +122,25 @@ func _on_entry_context_item_selected(action: String) -> void:
 		GameState.set_archive_entry_disabled(current_file, _context_target_blob.id, not currently_disabled)
 		_rebuild_entry_list()
 	elif action == "copy" or action == "paste":
-		_show_notice("ยังไม่รองรับฟังก์ชันนี้")
+		if warning_dialog:
+			warning_dialog.show_message("ยังไม่รองรับฟังก์ชันนี้")
 
 
-## REPACK is never blocked by the current data.protected state — the player
-## is free to repack anytime, whether or not the archive is currently
-## configured to unlock the file. GameState.is_locked(file) (computed live
-## from the current disabled-state) decides the actual outcome, not this
-## button; REPACK just reports it.
+## REPACK is never blocked by the current archive state, and never judges
+## the outcome either — a real repack tool just performs the operation and
+## reports "done," full stop. Whether the resulting file happens to open
+## afterward is not REPACK's concern; the player finds that out next time
+## they try to open it via FilesApp, not from this button.
 func _on_repack_pressed() -> void:
-	var locked := GameState.is_locked(current_file)
-	if locked:
-		feedback_label.text = "repack เสร็จแล้ว — ไฟล์นี้ยังล็อกอยู่ (data.protected ยัง enabled)"
-		feedback_label.add_theme_color_override("font_color", Palette.ACCENT_WARN)
-	else:
-		feedback_label.text = "repack สำเร็จ — เปิดไฟล์นี้ได้แล้วผ่าน drive"
-		# reuse ACCENT_MAXIMIZE (the green already in the palette) rather than add a new color
-		feedback_label.add_theme_color_override("font_color", Palette.ACCENT_MAXIMIZE)
-	file_repacked.emit(current_file, not locked)
-
-
-func _show_notice(text: String) -> void:
-	if is_instance_valid(_notice_label):
-		_notice_label.queue_free()
-
-	var lbl := Label.new()
-	lbl.text = text
-	lbl.add_theme_font_override("font", Palette.font_body)
-	lbl.add_theme_font_size_override("font_size", 5)
-	lbl.add_theme_color_override("font_color", Palette.ACCENT_WARN)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	add_child(lbl)
-	_notice_label = lbl
-
-	await get_tree().create_timer(1.5).timeout
-	if is_instance_valid(lbl):
-		lbl.queue_free()
+	var unlocked := GameState.get_lock_reason(current_file) == GameState.LockReason.UNLOCKED
+	file_repacked.emit(current_file, unlocked)
+	if warning_dialog:
+		warning_dialog.show_message("repack เสร็จสิ้น")
+	if window_manager and self_window_id != "":
+		window_manager.close_window(self_window_id)
 
 
 func _show_state(state: String) -> void:
 	header_label.visible = state == "unpack"
 	$VBox/Scroll.visible = state == "unpack"
-	feedback_label.visible = state == "unpack"
 	$VBox/BottomBar.visible = state == "unpack"

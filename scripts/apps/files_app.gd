@@ -9,6 +9,7 @@ const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 
 var window_manager: WindowManager
+var warning_dialog: WarningDialog
 
 ## Each entry is the full path (Array[FolderData]) from root to that entry's
 ## folder. Navigating never mutates FolderData/FileData; all state lives here.
@@ -30,7 +31,6 @@ var _devcrack_windows: Dictionary = {}
 ## should act on.
 var _context_target_file: FileData
 var _context_target_folder: FolderData
-var _notice_label: Label
 
 @onready var back_button: Button = $VBox/NavBar/BackButton
 @onready var forward_button: Button = $VBox/NavBar/ForwardButton
@@ -241,9 +241,7 @@ func _on_context_item_selected(action: String) -> void:
 			_open_devcrack(file)
 		elif action == "delete":
 			GameState.delete_file(file)
-			var key := _file_window_key(file)
-			if _open_file_windows.has(key):
-				window_manager.close_window(_open_file_windows[key])
+			_close_all_windows_for(file)
 	elif _context_target_folder:
 		var folder := _context_target_folder
 		if action == "open":
@@ -259,11 +257,21 @@ func _on_context_item_selected(action: String) -> void:
 ## the (now-trashed) subtree just to close those.
 func _close_open_windows_under(folder: FolderData) -> void:
 	for file in folder.files:
-		var key := _file_window_key(file)
-		if _open_file_windows.has(key):
-			window_manager.close_window(_open_file_windows[key])
+		_close_all_windows_for(file)
 	for subfolder in folder.subfolders:
 		_close_open_windows_under(subfolder)
+
+
+## A file can have both a NoteViewer and a DevCrack window open on it at
+## once (_open_file_windows/_devcrack_windows are tracked separately) — this
+## closes whichever of the two are actually open, so deleting a file never
+## leaves either kind dangling.
+func _close_all_windows_for(file: FileData) -> void:
+	var key := _file_window_key(file)
+	if _open_file_windows.has(key):
+		window_manager.close_window(_open_file_windows[key])
+	if _devcrack_windows.has(key):
+		window_manager.close_window(_devcrack_windows[key])
 
 
 func _open_file(file: FileData) -> void:
@@ -272,7 +280,8 @@ func _open_file(file: FileData) -> void:
 		return
 
 	if GameState.is_locked(file):
-		_show_notice("ไม่สามารถเปิดไฟล์นี้ได้ — ลองคลิกขวา > Unpack through DevCrack")
+		if warning_dialog:
+			warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้")
 		return
 
 	var key := _file_window_key(file)
@@ -296,31 +305,23 @@ func _open_devcrack(file: FileData) -> void:
 		return
 
 	var content: DevCrackApp = DEVCRACK_SCENE.instantiate()
+	content.warning_dialog = warning_dialog
+	content.window_manager = window_manager
+	content.file_repacked.connect(_on_file_repacked)
 	var win := window_manager.open_window(
 		content, "devcrack — %s.%s" % [file.filename, file.extension],
 		Rect2(50, 20, 190, 150)
 	)
 	_devcrack_windows[key] = win.window_id
+	content.self_window_id = win.window_id
 	content.unpack(file)
 
 
-func _show_notice(text: String) -> void:
-	if is_instance_valid(_notice_label):
-		_notice_label.queue_free()
-
-	var lbl := Label.new()
-	lbl.text = text
-	lbl.add_theme_font_override("font", Palette.font_body)
-	lbl.add_theme_font_size_override("font_size", 5)
-	lbl.add_theme_color_override("font_color", Palette.ACCENT_WARN)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	add_child(lbl)
-	_notice_label = lbl
-
-	await get_tree().create_timer(1.5).timeout
-	if is_instance_valid(lbl):
-		lbl.queue_free()
+## After a repack, the row for this file (e.g. its "(locked)" suffix) is
+## stale until the list is rebuilt — nothing else triggers that on its own,
+## since lock state isn't tracked via a dedicated signal the way trashing is.
+func _on_file_repacked(_file: FileData, _unlocked: bool) -> void:
+	_rebuild_list()
 
 
 func _file_window_key(file: FileData) -> String:
