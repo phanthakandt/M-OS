@@ -32,9 +32,17 @@ theme_override_constants/separation = 7
 
 [node name="DriveIcon" parent="IconGrid" unique_id=253294774 instance=ExtResource("3")]
 
-[node name="ReadmeIcon" parent="IconGrid" unique_id=368278350 instance=ExtResource("3")]
-
 [node name="TrashIcon" parent="IconGrid" unique_id=421827127 instance=ExtResource("3")]
+
+[node name="TopRightIconGrid" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 352.0
+offset_top = 8.0
+offset_right = 376.0
+offset_bottom = 60.0
+theme_override_constants/separation = 7
+
+[node name="ReadmeIcon" parent="TopRightIconGrid" unique_id=368278350 instance=ExtResource("3")]
 
 [node name="WindowLayer" type="Control" parent="." unique_id=2139230364]
 layout_mode = 1

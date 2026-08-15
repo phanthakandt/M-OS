@@ -20,5 +20,4 @@ script = ExtResource("1")
 id = "def_mos"
 filename = "def"
 extension = "mos"
-is_locked = true
 blobs = [SubResource("blob1"), SubResource("blob2")]

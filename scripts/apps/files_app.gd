@@ -279,9 +279,13 @@ func _open_file(file: FileData) -> void:
 	if not window_manager:
 		return
 
-	if GameState.is_locked(file):
+	var reason := GameState.get_lock_reason(file)
+	if reason != GameState.LockReason.UNLOCKED:
 		if warning_dialog:
-			warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้")
+			if reason == GameState.LockReason.CORRUPTED:
+				warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้เนื่องจากไฟล์เสียหาย")
+			else:
+				warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้")
 		return
 
 	var key := _file_window_key(file)

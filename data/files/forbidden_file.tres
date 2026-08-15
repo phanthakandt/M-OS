@@ -25,9 +25,7 @@ script = ExtResource("1")
 id = "forbidden_file"
 filename = "_unnamed"
 extension = "mos"
-is_locked = true
 is_protected = true
-is_corrupted = true
 content = "ไฟล์นี้ไม่มีชื่อผู้ใช้บันทึกไว้ในประวัติการแก้ไข
 
 [ยังไม่มีเนื้อหาเพิ่มเติมในต้นแบบนี้]"

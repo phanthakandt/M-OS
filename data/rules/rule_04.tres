@@ -6,4 +6,3 @@
 script = ExtResource("1")
 rule_number = 4
 text = "m-os มีระบบป้องกันกดเปิดไฟล์ วิธีการลบจะต้องแกะไฟล์ def.mos ออกมาก่อนผ่านโปรแกรม devcrack"
-unlocks_tool = "devcrack"

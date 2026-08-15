@@ -2,6 +2,7 @@ extends Control
 
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const FILES_APP_SCENE := preload("res://scenes/apps/FilesApp.tscn")
+const DEVCRACK_SCENE := preload("res://scenes/apps/DevCrackApp.tscn")
 const CONFIRM_DIALOG_SCENE := preload("res://scenes/ui/ConfirmDialog.tscn")
 const WARNING_DIALOG_SCENE := preload("res://scenes/ui/WarningDialog.tscn")
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
@@ -13,11 +14,18 @@ const RULE_02 := preload("res://data/rules/rule_02.tres")
 const RULE_03 := preload("res://data/rules/rule_03.tres")
 const RULE_04 := preload("res://data/rules/rule_04.tres")
 
+## readme.txt is a file like any other — not an app — so it's backed by a
+## real FileData (with blobs) instead of being a hardcoded special case.
+## This is what lets it be unpacked through DevCrack the same as anything
+## in FilesApp; whether it's actually locked is derived from its blobs, per
+## the immutability rule (never mutated here).
+const README_FILE := preload("res://data/files/readme.tres")
+
 @onready var background: ColorRect = $Background
 @onready var window_layer: Control = $WindowLayer
 @onready var window_manager: WindowManager = $WindowManager
 @onready var drive_icon: DesktopIconUI = $IconGrid/DriveIcon
-@onready var readme_icon: DesktopIconUI = $IconGrid/ReadmeIcon
+@onready var readme_icon: DesktopIconUI = $TopRightIconGrid/ReadmeIcon
 @onready var trash_icon: DesktopIconUI = $IconGrid/TrashIcon
 @onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
@@ -37,12 +45,13 @@ var _confirm_dialog: ConfirmDialog
 var _warning_dialog: WarningDialog
 var _context_menu: ContextMenu
 
-## The desktop icon's own open/delete actions, remembered between showing
-## its right-click menu and the player picking an item from it.
-## _context_target_delete_action is left invalid for icons with no delete
-## option (see _wire_icon).
+## The desktop icon's own open/delete/unpack actions, remembered between
+## showing its right-click menu and the player picking an item from it.
+## _context_target_delete_action/_context_target_unpack_action are left
+## invalid for icons with no delete/unpack option (see _wire_icon).
 var _context_target_open_action: Callable
 var _context_target_delete_action: Callable
+var _context_target_unpack_action: Callable
 
 ## Single-instance app windows opened from the desktop shell (icons, start
 ## menu), keyed by an arbitrary app key -> window_id. Reopening a key focuses
@@ -76,7 +85,7 @@ func _ready() -> void:
 	window_manager.window_closed.connect(_on_window_closed)
 
 	_wire_icon(drive_icon, "D", "drive", Callable(self, "_open_files_app"))
-	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"))
+	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"), Callable(self, "_open_readme_devcrack"))
 	_wire_icon(trash_icon, "X", "trash", Callable(self, "_open_trash_app"))
 
 	readme_icon.visible = not GameState.is_readme_deleted()
@@ -118,6 +127,15 @@ func _open_readme() -> void:
 	if _focus_if_open("readme"):
 		return
 
+	var reason := GameState.get_lock_reason(README_FILE)
+	if reason != GameState.LockReason.UNLOCKED:
+		if _warning_dialog:
+			if reason == GameState.LockReason.CORRUPTED:
+				_warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้เนื่องจากไฟล์เสียหาย")
+			else:
+				_warning_dialog.show_message("ไม่สามารถเปิดไฟล์นี้ได้")
+		return
+
 	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
 	var win := window_manager.open_window(content, "README.txt", Rect2(134, 29, 128, 147))
 	_singleton_windows["readme"] = win.window_id
@@ -125,6 +143,25 @@ func _open_readme() -> void:
 		"คำเตือน: นี่คือขั้นตอนการ Factory Restore M-OS กรุณาทำตามขั้นตอนต่อไปนี้อย่างเคร่งครัด",
 		[RULE_01, RULE_02, RULE_03, RULE_04]
 	)
+
+
+## Same "Unpack through DevCrack" flow as FilesApp._open_devcrack, just
+## opened from the desktop icon instead of a file-browser row — readme.txt
+## isn't part of the browsable data/drive.tres tree, so there's no FilesApp
+## instance to reuse here.
+func _open_readme_devcrack() -> void:
+	if _focus_if_open("readme_devcrack"):
+		return
+
+	var content: DevCrackApp = DEVCRACK_SCENE.instantiate()
+	content.warning_dialog = _warning_dialog
+	content.window_manager = window_manager
+	var win := window_manager.open_window(
+		content, "devcrack — README.txt", Rect2(50, 20, 190, 150)
+	)
+	_singleton_windows["readme_devcrack"] = win.window_id
+	content.self_window_id = win.window_id
+	content.unpack(README_FILE)
 
 
 func _open_files_app() -> void:
@@ -146,19 +183,23 @@ func _focus_if_open(key: String) -> bool:
 
 ## Most desktop icons (drive, trash) are apps with no FileData/FolderData
 ## behind them, so their right-click menu only ever offers "Open" — pass
-## delete_action for icons that represent an actual file (currently just
-## readme.txt) to also offer "Delete".
-func _wire_icon(icon: DesktopIconUI, glyph: String, label: String, open_action: Callable, delete_action: Callable = Callable()) -> void:
+## delete_action/unpack_action for icons that represent an actual file
+## (currently just readme.txt) to also offer "Delete"/"Unpack through
+## DevCrack", same options a file gets in FilesApp.
+func _wire_icon(icon: DesktopIconUI, glyph: String, label: String, open_action: Callable, delete_action: Callable = Callable(), unpack_action: Callable = Callable()) -> void:
 	icon.configure(glyph, label)
 	icon.activated.connect(open_action)
-	icon.context_requested.connect(_show_icon_context_menu.bind(open_action, delete_action))
+	icon.context_requested.connect(_show_icon_context_menu.bind(open_action, delete_action, unpack_action))
 
 
-func _show_icon_context_menu(open_action: Callable, delete_action: Callable) -> void:
+func _show_icon_context_menu(open_action: Callable, delete_action: Callable, unpack_action: Callable) -> void:
 	_context_target_open_action = open_action
 	_context_target_delete_action = delete_action
+	_context_target_unpack_action = unpack_action
 
 	var items: Array = [{"label": "Open", "action": "open"}]
+	if unpack_action.is_valid():
+		items.append({"label": "Unpack through DevCrack", "action": "unpack"})
 	if delete_action.is_valid():
 		items.append({"label": "Delete", "action": "delete"})
 	_context_menu.open_at(get_global_mouse_position(), items)
@@ -167,6 +208,8 @@ func _show_icon_context_menu(open_action: Callable, delete_action: Callable) -> 
 func _on_icon_context_item_selected(action: String) -> void:
 	if action == "open" and _context_target_open_action.is_valid():
 		_context_target_open_action.call()
+	elif action == "unpack" and _context_target_unpack_action.is_valid():
+		_context_target_unpack_action.call()
 	elif action == "delete" and _context_target_delete_action.is_valid():
 		_context_target_delete_action.call()
 

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FileData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/file_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/blob_data.gd" id="2"]
+
+[sub_resource type="Resource" id="blob1"]
+script = ExtResource("2")
+id = "readme_meta"
+label = "readme.meta  [header block]"
+
+[resource]
+script = ExtResource("1")
+id = "readme"
+filename = "README"
+extension = "txt"
+content = "คำเตือน: นี่คือขั้นตอนการ Factory Restore M-OS กรุณาทำตามขั้นตอนต่อไปนี้อย่างเคร่งครัด
+
+01. โปรดจงระลึกไว้เสมอว่าข้อมูลทั้งหมดในคอมพิวเตอร์เครื่องนี้เป็นทรัพย์สินส่วนบุคคล ห้ามเปิดไฟล์ใดๆ ก็ตามในเครื่องนี้
+
+02. เข้าไปที่ drive หาโฟลเดอร์ที่ชื่อว่า system (หากเข้า drive แล้วไม่เจอ ให้คลิก show hidden ก่อน)
+
+03. ...
+
+04. m-os มีระบบป้องกันกดเปิดไฟล์ วิธีการลบจะต้องแกะไฟล์ def.mos ออกมาก่อนผ่านโปรแกรม devcrack"
+blobs = [SubResource("blob1")]

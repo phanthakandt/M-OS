@@ -135,21 +135,28 @@ enum LockReason { UNLOCKED, PROTECTED, CORRUPTED }
 
 ## Computes *why* a file is locked, not just whether. PROTECTED means a
 ## should_remove entry (e.g. data.protected) is still enabled — the
-## intended block. CORRUPTED means a non-should_remove entry (essential
-## data) has been disabled — an unintended, self-inflicted break. Both
-## are reversible: re-enabling the relevant entry clears that condition,
-## same as everything else in this dictionary-backed session state.
+## intended block. CORRUPTED means any non-should_remove entry (essential
+## data) has been disabled instead — an unintended, self-inflicted break.
+## Unlike PROTECTED, CORRUPTED doesn't require the file to have a
+## should_remove blob at all: disabling essential data breaks *any* file
+## that carries it, puzzle file or not (e.g. readme.txt, which has no
+## should_remove blob but still corrupts if its one blob gets disabled).
+## Both conditions are reversible: re-enabling the relevant entry clears
+## them, same as everything else in this dictionary-backed session state.
 func get_lock_reason(file: FileData) -> int:
-	if not file.is_locked or is_unlocked(file):
+	if is_unlocked(file):
 		return LockReason.UNLOCKED
-	var corrupted := false
+
 	var protected_active := false
+	var corrupted := false
 	for blob in file.blobs:
 		var disabled := is_archive_entry_disabled(file, blob.id)
-		if blob.should_remove and not disabled:
-			protected_active = true
-		elif not blob.should_remove and disabled:
+		if blob.should_remove:
+			if not disabled:
+				protected_active = true
+		elif disabled:
 			corrupted = true
+
 	if corrupted:
 		return LockReason.CORRUPTED
 	if protected_active:
@@ -157,9 +164,10 @@ func get_lock_reason(file: FileData) -> int:
 	return LockReason.UNLOCKED
 
 
-## Effective lock state: initial data (FileData.is_locked) combined with
-## live archive-entry disabled state (see get_lock_reason()). FileData.is_locked
-## itself is never mutated.
+## Effective lock state: whether the file has any should_remove blob still
+## enabled or any essential (non-should_remove) blob disabled (see
+## get_lock_reason()). Nothing on FileData/BlobData is ever mutated — this
+## is computed live every call.
 func is_locked(file: FileData) -> bool:
 	return get_lock_reason(file) != LockReason.UNLOCKED
 

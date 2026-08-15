@@ -78,7 +78,24 @@ func _on_window_closed(window_id: String) -> void:
 	_windows.erase(window_id)
 	if _active_id == window_id:
 		_active_id = ""
+		_focus_topmost_visible()
 	window_closed.emit(window_id)
+
+
+## Closing the active window otherwise leaves nothing focused until the
+## player clicks something themselves — bring the next topmost *visible*
+## window forward instead (skip minimized ones). Topmost = last child of
+## window_layer, same convention _focus() itself uses when raising a
+## window; _windows.has(...) guards against the just-closed window's node,
+## which is still in the tree (queue_free is deferred) but already erased
+## from _windows above.
+func _focus_topmost_visible() -> void:
+	var children := window_layer.get_children()
+	for i in range(children.size() - 1, -1, -1):
+		var win: AppWindow = children[i]
+		if win.visible and _windows.has(win.window_id):
+			_focus(win.window_id)
+			return
 
 
 func _on_window_focused(window_id: String) -> void:
