@@ -15,7 +15,10 @@ func _ready() -> void:
 	catcher.gui_input.connect(_on_catcher_gui_input)
 
 
-## items: Array of {"label": String, "action": String}. global_pos is
+## items: Array of {"label": String, "action": String, "disabled": bool}.
+## "disabled" is optional (defaults false) — a disabled item renders at half
+## opacity and never fires item_selected, same modulate.a = 0.5 convention
+## DevCrackApp uses for its own disabled archive entries. global_pos is
 ## clamped so the menu never renders outside this control's own rect.
 func open_at(global_pos: Vector2, items: Array) -> void:
 	# free(), not queue_free(): the old buttons must be gone *before*
@@ -36,7 +39,11 @@ func open_at(global_pos: Vector2, items: Array) -> void:
 		btn.add_theme_stylebox_override("normal", Palette.task_item_style())
 		btn.add_theme_stylebox_override("hover", Palette.task_item_style())
 		btn.add_theme_stylebox_override("pressed", Palette.task_item_style())
-		btn.pressed.connect(_on_item_pressed.bind(item.action as String))
+		if item.get("disabled", false):
+			btn.disabled = true
+			btn.modulate.a = 0.5
+		else:
+			btn.pressed.connect(_on_item_pressed.bind(item.action as String))
 		vbox.add_child(btn)
 
 	catcher.visible = true

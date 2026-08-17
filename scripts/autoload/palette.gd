@@ -19,6 +19,7 @@ const ACCENT_MINIMIZE := Color("#a89448")
 const ACCENT_MAXIMIZE := Color("#4a8a5a")
 const SCRIM := Color(0, 0, 0, 0.55)
 const VOID := Color(0, 0, 0, 1)
+const TRANSPARENT := Color(0, 0, 0, 0)
 
 static func make_flat_style(bg: Color, border_color: Color, border_width: int = 1, margin: int = 0) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -47,6 +48,15 @@ static func taskbar_style() -> StyleBoxFlat:
 
 static func task_item_style() -> StyleBoxFlat:
 	return make_flat_style(WINDOW_BG, BORDER, 1, 2)
+
+## Same border width/content margin as task_item_style() but fully
+## transparent — for rows that only show their box on hover (see
+## TaskManagerApp): swapping straight from a borderless StyleBoxEmpty to
+## task_item_style() changes the row's minimum size and makes the whole list
+## jump, since border width and margin suddenly appear. Reserving the same
+## space at rest, just invisibly, keeps hover from changing layout at all.
+static func task_item_style_invisible() -> StyleBoxFlat:
+	return make_flat_style(TRANSPARENT, TRANSPARENT, 1, 2)
 
 static func start_button_style() -> StyleBoxFlat:
 	return make_flat_style(WINDOW_BG, BORDER_LIGHT, 1, 3)

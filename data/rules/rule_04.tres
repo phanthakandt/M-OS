@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="RuleData" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/resources/rule_data.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-rule_number = 4
-text = "m-os มีระบบป้องกันกดเปิดไฟล์ วิธีการลบจะต้องแกะไฟล์ def.mos ออกมาก่อนผ่านโปรแกรม devcrack"

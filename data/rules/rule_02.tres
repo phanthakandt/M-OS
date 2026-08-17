@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="RuleData" format=3 uid="uid://drrfqwt62wgdf"]
-
-[ext_resource type="Script" uid="uid://bbp2birr6egsf" path="res://scripts/resources/rule_data.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-rule_number = 2
-text = "เข้าไปที่ drive หาโฟลเดอร์ที่ชื่อว่า system (หากเข้า drive แล้วไม่เจอ ให้คลิก show hidden ก่อน)"

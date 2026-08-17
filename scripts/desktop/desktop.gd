@@ -9,11 +9,6 @@ const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
 const TRASH_APP_SCENE := preload("res://scenes/apps/TrashApp.tscn")
 
-const RULE_01 := preload("res://data/rules/rule_01.tres")
-const RULE_02 := preload("res://data/rules/rule_02.tres")
-const RULE_03 := preload("res://data/rules/rule_03.tres")
-const RULE_04 := preload("res://data/rules/rule_04.tres")
-
 ## readme.txt is a file like any other — not an app — so it's backed by a
 ## real FileData (with blobs) instead of being a hardcoded special case.
 ## This is what lets it be unpacked through DevCrack the same as anything
@@ -139,10 +134,7 @@ func _open_readme() -> void:
 	var content: NoteViewer = NOTE_VIEWER_SCENE.instantiate()
 	var win := window_manager.open_window(content, "README.txt", Rect2(134, 29, 128, 147))
 	_singleton_windows["readme"] = win.window_id
-	content.show_warning_and_rules(
-		"คำเตือน: นี่คือขั้นตอนการ Factory Restore M-OS กรุณาทำตามขั้นตอนต่อไปนี้อย่างเคร่งครัด",
-		[RULE_01, RULE_02, RULE_03, RULE_04]
-	)
+	content.show_plain(README_FILE.content)
 
 
 ## Same "Unpack through DevCrack" flow as FilesApp._open_devcrack, just

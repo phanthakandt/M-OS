@@ -180,9 +180,6 @@ func _add_file_row(file: FileData) -> void:
 	if file.is_hidden:
 		text += "  (hidden)"
 		color = Palette.TEXT_FAINT
-	elif GameState.is_locked(file):
-		text += "  (locked)"
-		color = Palette.ACCENT_WARN
 
 	var row := _make_row(text, color)
 	row.gui_input.connect(_on_file_row_gui_input.bind(file))
@@ -321,9 +318,6 @@ func _open_devcrack(file: FileData) -> void:
 	content.unpack(file)
 
 
-## After a repack, the row for this file (e.g. its "(locked)" suffix) is
-## stale until the list is rebuilt — nothing else triggers that on its own,
-## since lock state isn't tracked via a dedicated signal the way trashing is.
 func _on_file_repacked(_file: FileData, _unlocked: bool) -> void:
 	_rebuild_list()
 
