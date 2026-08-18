@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="ChatThreadData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/chat_thread_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/chat_message_data.gd" id="2"]
+
+[sub_resource type="Resource" id="msg1"]
+script = ExtResource("2")
+sender = "???"
+text = "อย่าไว้ใจทุกอย่างที่เครื่องนี้บอกคุณ"
+timestamp = "03:12"
+
+[sub_resource type="Resource" id="msg2"]
+script = ExtResource("2")
+sender = "???"
+text = "มันไม่ใช่คอมพิวเตอร์ธรรมดา"
+timestamp = "03:13"
+
+[sub_resource type="Resource" id="msg3"]
+script = ExtResource("2")
+sender = "me"
+text = "คุณเป็นใคร ทำไมถึงมีเบอร์ผม"
+timestamp = "03:15"
+
+[sub_resource type="Resource" id="msg4"]
+script = ExtResource("2")
+sender = "???"
+text = "คนที่เคยอยู่ตรงนั้นมาก่อนคุณ"
+timestamp = "03:16"
+
+[sub_resource type="Resource" id="msg5"]
+script = ExtResource("2")
+sender = "???"
+text = "ระบบจะพยายามทำให้คุณลืมทีละนิด"
+timestamp = "03:18"
+
+[sub_resource type="Resource" id="msg6"]
+script = ExtResource("2")
+sender = "me"
+text = "ลืมอะไร"
+timestamp = "03:19"
+
+[resource]
+script = ExtResource("1")
+id = "unknown_number"
+contact_name = "???"
+last_message_preview = "ลืมอะไร"
+requires_code = true
+messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5"), SubResource("msg6")]

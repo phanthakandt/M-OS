@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="FileData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="FileData" format=3 uid="uid://dcdgewbc40wi4"]
 
-[ext_resource type="Script" path="res://scripts/resources/file_data.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/resources/blob_data.gd" id="2"]
+[ext_resource type="Script" uid="uid://ckshu66iu2b5i" path="res://scripts/resources/file_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://b3epfjjjavbdb" path="res://scripts/resources/blob_data.gd" id="2"]
 
 [sub_resource type="Resource" id="blob1"]
 script = ExtResource("2")

@@ -66,3 +66,18 @@ static func tb_btn_style_accent(accent: Color) -> StyleBoxFlat:
 
 static func blob_marked_style() -> StyleBoxFlat:
 	return make_flat_style(Color(ACCENT_WARN.r, ACCENT_WARN.g, ACCENT_WARN.b, 0.15), ACCENT_WARN, 1, 2)
+
+## KikuChat contact row: a flat list row (bottom-divider only, not a boxed
+## item like task_item_style()) that highlights on hover and stays
+## highlighted while selected — selected always wins over hovered.
+static func chat_contact_row_style(selected: bool, hovered: bool = false) -> StyleBoxFlat:
+	var bg := TITLEBAR_BG_ACTIVE if selected else (TITLEBAR_BG if hovered else WINDOW_BG)
+	var style := make_flat_style(bg, BORDER, 0, 2)
+	style.border_width_bottom = 1
+	return style
+
+## KikuChat message bubble: same bordered-box shape as task_item_style(),
+## just a different fill per sender ("me" vs. the contact) and a bit more
+## padding, matching a chat bubble's proportions rather than a list row's.
+static func chat_bubble_style(is_me: bool) -> StyleBoxFlat:
+	return make_flat_style(TITLEBAR_BG if is_me else DESKTOP_BG_2, BORDER, 1, 3)

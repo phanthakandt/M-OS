@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="ChatThreadData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/chat_thread_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/chat_message_data.gd" id="2"]
+
+[sub_resource type="Resource" id="msg1"]
+script = ExtResource("2")
+sender = "แม่"
+text = "ลูกจ๋า เครื่องคอมที่บ้านยังเปิดอยู่รึเปล่า แม่ปิดสวิตช์ทั้งบ้านไปแล้วนะ"
+timestamp = "08:14"
+
+[sub_resource type="Resource" id="msg2"]
+script = ExtResource("2")
+sender = "me"
+text = "เปิดอยู่ครับแม่ กำลังจัดการอยู่"
+timestamp = "08:15"
+
+[sub_resource type="Resource" id="msg3"]
+script = ExtResource("2")
+sender = "แม่"
+text = "อย่าไปแตะอะไรที่ไม่รู้จักนะลูก บางอย่างมันไม่ควรถูกเปิด"
+timestamp = "08:16"
+
+[sub_resource type="Resource" id="msg4"]
+script = ExtResource("2")
+sender = "me"
+text = "ครับ ผมระวังอยู่แล้ว"
+timestamp = "08:17"
+
+[sub_resource type="Resource" id="msg5"]
+script = ExtResource("2")
+sender = "แม่"
+text = "ถ้ารู้สึกแปลกๆ ให้โทรหาแม่ทันทีนะ รักลูกนะ"
+timestamp = "08:19"
+
+[resource]
+script = ExtResource("1")
+id = "mom_chat"
+contact_name = "แม่"
+last_message_preview = "ถ้ารู้สึกแปลกๆ ให้โทรหาแม่ทันทีนะ รักลูกนะ"
+requires_code = false
+messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5")]

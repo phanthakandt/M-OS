@@ -39,6 +39,7 @@ func open_at(global_pos: Vector2, items: Array) -> void:
 		btn.add_theme_stylebox_override("normal", Palette.task_item_style())
 		btn.add_theme_stylebox_override("hover", Palette.task_item_style())
 		btn.add_theme_stylebox_override("pressed", Palette.task_item_style())
+		btn.add_theme_stylebox_override("disabled", Palette.task_item_style())
 		if item.get("disabled", false):
 			btn.disabled = true
 			btn.modulate.a = 0.5

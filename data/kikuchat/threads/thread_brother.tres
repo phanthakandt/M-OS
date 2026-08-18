@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="ChatThreadData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/chat_thread_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/chat_message_data.gd" id="2"]
+
+[sub_resource type="Resource" id="msg1"]
+script = ExtResource("2")
+sender = "พี่ชาย"
+text = "น้อง ถ้าเห็นข้อความนี้ แปลว่าเครื่องนี้ยังเปิดอยู่"
+timestamp = "23:47"
+
+[sub_resource type="Resource" id="msg2"]
+script = ExtResource("2")
+sender = "พี่ชาย"
+text = "พี่ขอโทษที่ไม่ได้บอกอะไรก่อนหายไป"
+timestamp = "23:49"
+
+[sub_resource type="Resource" id="msg3"]
+script = ExtResource("2")
+sender = "me"
+text = "พี่อยู่ไหน ทำไมไม่กลับบ้านสักที"
+timestamp = "23:52"
+
+[sub_resource type="Resource" id="msg4"]
+script = ExtResource("2")
+sender = "พี่ชาย"
+text = "พี่กลับไม่ได้แล้วน้อง"
+timestamp = "23:54"
+
+[sub_resource type="Resource" id="msg5"]
+script = ExtResource("2")
+sender = "พี่ชาย"
+text = "แค่อยากให้รู้ว่าพี่ยังคิดถึงอยู่เสมอ"
+timestamp = "23:55"
+
+[sub_resource type="Resource" id="msg6"]
+script = ExtResource("2")
+sender = "me"
+text = "พี่..."
+timestamp = "23:57"
+
+[sub_resource type="Resource" id="msg7"]
+script = ExtResource("2")
+sender = "พี่ชาย"
+text = "ดูแลตัวเองด้วยนะ"
+timestamp = "23:59"
+
+[resource]
+script = ExtResource("1")
+id = "brother_chat"
+contact_name = "พี่ชาย"
+last_message_preview = "ดูแลตัวเองด้วยนะ"
+requires_code = true
+messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5"), SubResource("msg6"), SubResource("msg7")]

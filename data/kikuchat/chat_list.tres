@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="KikuChatListData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/kikuchat_list_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/kikuchat/threads/thread_mom.tres" id="3"]
+[ext_resource type="Resource" path="res://data/kikuchat/threads/thread_keng.tres" id="4"]
+[ext_resource type="Resource" path="res://data/kikuchat/threads/thread_unknown.tres" id="5"]
+[ext_resource type="Resource" path="res://data/kikuchat/threads/thread_brother.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+access_code = "1123"
+threads = [ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")]

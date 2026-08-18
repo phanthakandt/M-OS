@@ -8,6 +8,7 @@ const WARNING_DIALOG_SCENE := preload("res://scenes/ui/WarningDialog.tscn")
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
 const TRASH_APP_SCENE := preload("res://scenes/apps/TrashApp.tscn")
+const KIKUCHAT_SCENE := preload("res://scenes/apps/KikuChatApp.tscn")
 
 ## readme.txt is a file like any other — not an app — so it's backed by a
 ## real FileData (with blobs) instead of being a hardcoded special case.
@@ -22,6 +23,7 @@ const README_FILE := preload("res://data/files/readme.tres")
 @onready var drive_icon: DesktopIconUI = $IconGrid/DriveIcon
 @onready var readme_icon: DesktopIconUI = $TopRightIconGrid/ReadmeIcon
 @onready var trash_icon: DesktopIconUI = $IconGrid/TrashIcon
+@onready var kikuchat_icon: DesktopIconUI = $IconGrid/KikuChatIcon
 @onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
 @onready var start_button: Button = $Taskbar/Panel/HBox/StartButton
@@ -82,6 +84,7 @@ func _ready() -> void:
 	_wire_icon(drive_icon, "D", "drive", Callable(self, "_open_files_app"))
 	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"), Callable(self, "_open_readme_devcrack"))
 	_wire_icon(trash_icon, "X", "trash", Callable(self, "_open_trash_app"))
+	_wire_icon(kikuchat_icon, "K", "KikuChat", Callable(self, "_open_kikuchat"))
 
 	readme_icon.visible = not GameState.is_readme_deleted()
 	GameState.trashed_changed.connect(_on_trashed_changed)
@@ -164,6 +167,16 @@ func _open_files_app() -> void:
 	content.warning_dialog = _warning_dialog
 	var win := window_manager.open_window(content, "drive", Rect2(40, 30, 160, 140))
 	_singleton_windows["drive"] = win.window_id
+
+
+func _open_kikuchat() -> void:
+	if _focus_if_open("kikuchat"):
+		return
+	var content: KikuChatApp = KIKUCHAT_SCENE.instantiate()
+	content.window_manager = window_manager
+	content.warning_dialog = _warning_dialog
+	var win := window_manager.open_window(content, "KikuChat", Rect2(45, 15, 190, 150))
+	_singleton_windows["kikuchat"] = win.window_id
 
 
 func _focus_if_open(key: String) -> bool:

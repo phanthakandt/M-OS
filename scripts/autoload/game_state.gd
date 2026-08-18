@@ -26,6 +26,17 @@ var _readme_deleted: bool = false
 ## only — never mutates BlobData/FileData.
 var _disabled_archive_entries: Dictionary = {}
 
+## Password-unlock state for apps like KikuChat (see kikuchat_app.gd) — a
+## completely separate mechanic from the DevCrack/blob lock system above.
+## Keyed by an app_id String (e.g. "kikuchat") -> true once that app's code
+## has been entered correctly once. GameState never knows the actual code or
+## compares it — it only remembers that an app has been unlocked; the app
+## itself owns its access code (see KikuChatListData.access_code) and does
+## the comparison. Keying by app_id from the start means a second app (e.g.
+## MosMail) can reuse is_app_unlocked_by_code()/unlock_app_with_code() with
+## its own app_id and get a fully independent unlock state for free.
+var _code_unlocked_apps: Dictionary = {}
+
 
 func _file_key(file: FileData) -> String:
 	if file.id != "":
@@ -172,9 +183,18 @@ func is_locked(file: FileData) -> bool:
 	return get_lock_reason(file) != LockReason.UNLOCKED
 
 
+func is_app_unlocked_by_code(app_id: String) -> bool:
+	return _code_unlocked_apps.get(app_id, false)
+
+
+func unlock_app_with_code(app_id: String) -> void:
+	_code_unlocked_apps[app_id] = true
+
+
 func reset_progress() -> void:
 	unlocked_files.clear()
 	_trashed_files.clear()
 	_trashed_folders.clear()
 	_readme_deleted = false
 	_disabled_archive_entries.clear()
+	_code_unlocked_apps.clear()

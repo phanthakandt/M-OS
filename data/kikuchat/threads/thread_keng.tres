@@ -1,0 +1,54 @@
+[gd_resource type="Resource" script_class="ChatThreadData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/chat_thread_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/chat_message_data.gd" id="2"]
+
+[sub_resource type="Resource" id="msg1"]
+script = ExtResource("2")
+sender = "เก่ง"
+text = "เฮ้ย พรุ่งนี้ไปติวกันไหม"
+timestamp = "21:02"
+
+[sub_resource type="Resource" id="msg2"]
+script = ExtResource("2")
+sender = "me"
+text = "คงไปไม่ได้ว่ะ ช่วงนี้นอนไม่ค่อยหลับ"
+timestamp = "21:05"
+
+[sub_resource type="Resource" id="msg3"]
+script = ExtResource("2")
+sender = "เก่ง"
+text = "เป็นอะไรอ่ะ ทำงานหนักไปเหรอ"
+timestamp = "21:06"
+
+[sub_resource type="Resource" id="msg4"]
+script = ExtResource("2")
+sender = "me"
+text = "เปล่า เหมือนได้ยินเสียงอะไรในบ้านตลอดเลย"
+timestamp = "21:08"
+
+[sub_resource type="Resource" id="msg5"]
+script = ExtResource("2")
+sender = "เก่ง"
+text = "เสียงอะไร ผีเหรอ 555"
+timestamp = "21:09"
+
+[sub_resource type="Resource" id="msg6"]
+script = ExtResource("2")
+sender = "me"
+text = "ไม่รู้ว่ะ เหมือนมีคนพิมพ์คีย์บอร์ดตอนตีสาม ทั้งที่ไม่มีใครอยู่"
+timestamp = "21:11"
+
+[sub_resource type="Resource" id="msg7"]
+script = ExtResource("2")
+sender = "เก่ง"
+text = "หลอนโว้ย เดี๋ยวพรุ่งนี้โทรหานะ ดูแลตัวเองด้วย"
+timestamp = "21:13"
+
+[resource]
+script = ExtResource("1")
+id = "keng_chat"
+contact_name = "เก่ง"
+last_message_preview = "หลอนโว้ย เดี๋ยวพรุ่งนี้โทรหานะ ดูแลตัวเองด้วย"
+requires_code = false
+messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5"), SubResource("msg6"), SubResource("msg7")]
