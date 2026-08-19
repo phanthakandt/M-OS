@@ -5,6 +5,21 @@ static var font_chrome: FontFile = preload("res://assets/fonts/PressStart2P-Regu
 
 const DESKTOP_BG_1 := Color("#161c22")
 const DESKTOP_BG_2 := Color("#1c2530")
+## Endpoint of the desktop's ghost-process corruption tint (see
+## desktop_corruption_color()) — deliberately darker/dimmer than ACCENT_WARN,
+## which is sized for a small accent, not a full-screen background wash.
+const DESKTOP_BG_DANGER := Color("#3a1417")
+## CanvasModulate endpoints for corruption_modulate() — Desktop.tscn's single
+## CanvasModulate multiplies these against every already-drawn pixel on
+## screen (windows, taskbar, icons, text, not just the desktop background),
+## so this is what makes the *whole screen* bleed red as ghost processes pile
+## up, not just Background. NORMAL is identity (no tint); DANGER only pulls
+## green/blue down (hard, for a vivid/saturated red at full corruption rather
+## than a muddy one) — red is left at 1.0 rather than boosted above it, since
+## a Color channel above 1.0 just clamps to no-op on an LDR (Compatibility
+## renderer) backbuffer.
+const CANVAS_MODULATE_NORMAL := Color(1, 1, 1, 1)
+const CANVAS_MODULATE_DANGER := Color(1.0, 0.15, 0.2, 1)
 const WINDOW_BG := Color("#232d38")
 const TITLEBAR_BG := Color("#2c3948")
 const TITLEBAR_BG_ACTIVE := Color("#354658")
@@ -81,3 +96,30 @@ static func chat_contact_row_style(selected: bool, hovered: bool = false) -> Sty
 ## padding, matching a chat bubble's proportions rather than a list row's.
 static func chat_bubble_style(is_me: bool) -> StyleBoxFlat:
 	return make_flat_style(TITLEBAR_BG if is_me else DESKTOP_BG_2, BORDER, 1, 3)
+
+## Shared 0..1 corruption progress for both desktop_corruption_color() and
+## corruption_modulate(), so the eased curve is only written once. Eased
+## (quadratic, t*t) rather than linear, and deliberately ease-*in* rather
+## than ease-out — the first several ghost processes should read as almost
+## no change at all, with the shift only becoming obvious as count climbs
+## toward max_count, so the corruption creeps up on the player instead of
+## announcing itself immediately.
+static func _corruption_t(ghost_count: int, max_count: int) -> float:
+	var t: float = clamp(float(ghost_count) / float(max_count), 0.0, 1.0)
+	return t * t
+
+## Desktop.background's color as a function of how many ghost processes
+## (GameState.get_ghost_process_count()) are currently alive — an eased lerp
+## from the normal desktop background toward DESKTOP_BG_DANGER, fully
+## saturated at max_count. The one place this lerp is written; callers (just
+## Desktop so far) always go through here instead of repeating it.
+static func desktop_corruption_color(ghost_count: int, max_count: int = 15) -> Color:
+	return DESKTOP_BG_1.lerp(DESKTOP_BG_DANGER, _corruption_t(ghost_count, max_count))
+
+## Desktop.tscn's single CanvasModulate node's color, same ghost-count
+## progress as desktop_corruption_color() but eased against
+## CANVAS_MODULATE_NORMAL/CANVAS_MODULATE_DANGER instead — this is what tints
+## every already-rendered pixel on screen (windows, taskbar, icons, text),
+## not just the desktop background. See Desktop._update_corruption_tint().
+static func corruption_modulate(ghost_count: int, max_count: int = 15) -> Color:
+	return CANVAS_MODULATE_NORMAL.lerp(CANVAS_MODULATE_DANGER, _corruption_t(ghost_count, max_count))

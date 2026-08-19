@@ -22,6 +22,9 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.086, 0.109, 0.133, 1)
 
+[node name="CorruptionModulate" type="CanvasModulate" parent="."]
+color = Color(1, 1, 1, 1)
+
 [node name="IconGrid" type="VBoxContainer" parent="." unique_id=393752247]
 layout_mode = 0
 offset_left = 8.0

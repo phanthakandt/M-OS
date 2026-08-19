@@ -18,6 +18,7 @@ const KIKUCHAT_SCENE := preload("res://scenes/apps/KikuChatApp.tscn")
 const README_FILE := preload("res://data/files/readme.tres")
 
 @onready var background: ColorRect = $Background
+@onready var corruption_modulate: CanvasModulate = $CorruptionModulate
 @onready var window_layer: Control = $WindowLayer
 @onready var window_manager: WindowManager = $WindowManager
 @onready var drive_icon: DesktopIconUI = $IconGrid/DriveIcon
@@ -57,7 +58,8 @@ var _singleton_windows: Dictionary = {}
 
 
 func _ready() -> void:
-	background.color = Palette.DESKTOP_BG_1
+	GameState.ghost_processes_changed.connect(_update_corruption_tint)
+	_update_corruption_tint()
 
 	taskbar_panel.add_theme_stylebox_override("panel", Palette.taskbar_style())
 
@@ -119,6 +121,22 @@ func _ready() -> void:
 func _update_clock() -> void:
 	var t := Time.get_time_dict_from_system()
 	clock_label.text = "%02d:%02d" % [t.hour, t.minute]
+
+
+## Bleeds both the desktop background and the whole screen toward red as the
+## number of live ghost processes (GameState.get_ghost_process_count())
+## climbs. background.color only tints Background itself (see
+## Palette.desktop_corruption_color()); corruption_modulate.color is
+## Desktop.tscn's single CanvasModulate, which multiplies against every
+## already-rendered pixel on screen — windows, taskbar, icons, text — so
+## that's what makes the whole screen corrupt together, not just the desktop
+## behind everything (see Palette.corruption_modulate()). Called once up
+## front in _ready() (in case the count is ever nonzero at boot) and again
+## every time GameState.ghost_processes_changed fires.
+func _update_corruption_tint() -> void:
+	var ghost_count := GameState.get_ghost_process_count()
+	background.color = Palette.desktop_corruption_color(ghost_count)
+	corruption_modulate.color = Palette.corruption_modulate(ghost_count)
 
 
 func _open_readme() -> void:

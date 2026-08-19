@@ -130,8 +130,12 @@ func _on_entry_context_item_selected(action: String) -> void:
 ## the outcome either — a real repack tool just performs the operation and
 ## reports "done," full stop. Whether the resulting file happens to open
 ## afterward is not REPACK's concern; the player finds that out next time
-## they try to open it via FilesApp, not from this button.
+## they try to open it via FilesApp, not from this button. The
+## on_devcrack_repacked() call is the same kind of unconditional side effect —
+## a flat per-press chance of spawning a ghost process, regardless of file or
+## outcome (see GameState.on_devcrack_repacked()).
 func _on_repack_pressed() -> void:
+	GameState.on_devcrack_repacked()
 	var unlocked := GameState.get_lock_reason(current_file) == GameState.LockReason.UNLOCKED
 	file_repacked.emit(current_file, unlocked)
 	if warning_dialog:

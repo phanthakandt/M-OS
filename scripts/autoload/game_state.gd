@@ -1,6 +1,7 @@
 extends Node
 
 signal trashed_changed
+signal ghost_processes_changed
 
 ## Runtime progress, keyed by FileData.id (falls back to resource_path).
 ## Never mutate FileData resources directly — preloaded resources are cached
@@ -36,6 +37,16 @@ var _disabled_archive_entries: Dictionary = {}
 ## MosMail) can reuse is_app_unlocked_by_code()/unlock_app_with_code() with
 ## its own app_id and get a fully independent unlock state for free.
 var _code_unlocked_apps: Dictionary = {}
+
+## "Ghost process" cascade, driven entirely from here (not DevCrackApp or
+## TaskManagerApp, which just call in and render — see on_devcrack_repacked()/
+## kill_ghost_process()). Session state only, like everything else in this
+## file: cleared on reset_progress(), never persisted, never backed by a
+## resource. Each entry is {id: String, name: String, hidden: bool,
+## killable: bool}. Entries are never capped — accumulation without limit is
+## the intended pressure mechanic, not an oversight.
+var _ghost_processes: Array = []
+var _next_ghost_id: int = 0
 
 
 func _file_key(file: FileData) -> String:
@@ -191,6 +202,60 @@ func unlock_app_with_code(app_id: String) -> void:
 	_code_unlocked_apps[app_id] = true
 
 
+## Called by DevCrackApp unconditionally on every REPACK press, regardless of
+## which file or what the repack's outcome is (REPACK never branches on
+## outcome — see DevCrackApp._on_repack_pressed). It's a flat per-repack
+## chance, not tied to solving or breaking anything. Emits
+## ghost_processes_changed only when the roll actually spawns something —
+## unlike kill_ghost_process(), a miss here is a true no-op, so there's
+## nothing for TaskManagerApp/Desktop to react to.
+func on_devcrack_repacked() -> void:
+	if randf() < 0.7:
+		_spawn_ghost_process("lived.process", false, true)
+		ghost_processes_changed.emit()
+
+
+## Kills a ghost process by id. Only killing a "lived.process" entry can
+## cascade into spawning a "ssecorp.devil" in its place (hidden, and only a
+## 40% chance killable) — killing (or failing to kill) a "ssecorp.devil"
+## never cascades further. ghost_processes_changed always fires, whether or
+## not a cascade spawn happened, so TaskManagerApp's list stays live either way.
+func kill_ghost_process(id: String) -> void:
+	var killed_name := ""
+	for i in _ghost_processes.size():
+		if _ghost_processes[i].id == id:
+			killed_name = _ghost_processes[i].name
+			_ghost_processes.remove_at(i)
+			break
+	if killed_name == "lived.process" and randf() < 0.7:
+		_spawn_ghost_process("ssecorp.devil", true, randf() >= 0.6)
+	ghost_processes_changed.emit()
+
+
+## Read-only — TaskManagerApp renders straight from this, never mutates it.
+func get_ghost_processes() -> Array:
+	return _ghost_processes
+
+
+## _ghost_processes only ever holds entries that haven't been killed yet
+## (killing one removes it — see kill_ghost_process()), so its size already
+## is exactly "how many lived.process/ssecorp.devil are currently alive."
+func get_ghost_process_count() -> int:
+	return _ghost_processes.size()
+
+
+## Shared by on_devcrack_repacked() and kill_ghost_process()'s cascade, so
+## id-assignment and the entry shape only live in one place.
+func _spawn_ghost_process(process_name: String, hidden: bool, killable: bool) -> void:
+	_ghost_processes.append({
+		"id": "ghost_%d" % _next_ghost_id,
+		"name": process_name,
+		"hidden": hidden,
+		"killable": killable,
+	})
+	_next_ghost_id += 1
+
+
 func reset_progress() -> void:
 	unlocked_files.clear()
 	_trashed_files.clear()
@@ -198,3 +263,5 @@ func reset_progress() -> void:
 	_readme_deleted = false
 	_disabled_archive_entries.clear()
 	_code_unlocked_apps.clear()
+	_ghost_processes.clear()
+	_next_ghost_id = 0
