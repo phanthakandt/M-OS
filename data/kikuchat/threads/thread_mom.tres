@@ -7,30 +7,35 @@
 script = ExtResource("2")
 sender = "แม่"
 text = "ลูกจ๋า เครื่องคอมที่บ้านยังเปิดอยู่รึเปล่า แม่ปิดสวิตช์ทั้งบ้านไปแล้วนะ"
+date = "18 สิงหาคม 2569"
 timestamp = "08:14"
 
 [sub_resource type="Resource" id="msg2"]
 script = ExtResource("2")
 sender = "me"
 text = "เปิดอยู่ครับแม่ กำลังจัดการอยู่"
+date = "18 สิงหาคม 2569"
 timestamp = "08:15"
 
 [sub_resource type="Resource" id="msg3"]
 script = ExtResource("2")
 sender = "แม่"
 text = "อย่าไปแตะอะไรที่ไม่รู้จักนะลูก บางอย่างมันไม่ควรถูกเปิด"
+date = "18 สิงหาคม 2569"
 timestamp = "08:16"
 
 [sub_resource type="Resource" id="msg4"]
 script = ExtResource("2")
 sender = "me"
 text = "ครับ ผมระวังอยู่แล้ว"
+date = "19 สิงหาคม 2569"
 timestamp = "08:17"
 
 [sub_resource type="Resource" id="msg5"]
 script = ExtResource("2")
 sender = "แม่"
 text = "ถ้ารู้สึกแปลกๆ ให้โทรหาแม่ทันทีนะ รักลูกนะ"
+date = "19 สิงหาคม 2569"
 timestamp = "08:19"
 
 [resource]

@@ -228,8 +228,69 @@ func _render_chat_pane() -> void:
 		return
 
 	chat_header.text = _selected_thread.contact_name
+	var previous_date := ""
 	for message in _selected_thread.messages:
+		if message.date != previous_date:
+			_add_date_divider(message.date)
+			previous_date = message.date
 		_add_message_bubble(message)
+
+	_scroll_to_latest_message()
+
+
+## Opening/switching a thread should land on its most recent message, like
+## any real chat app, not leave the view sitting at the oldest one.
+## MessagesScroll's scrollable range isn't valid until the ScrollContainer
+## has processed the new bubbles' layout — and on this pane's very first
+## render that can take more than a single frame (minimum-size propagation
+## through MessagesMargin -> MessagesList -> each bubble's autowrapped Label
+## settles gradually, unlike later re-renders where most of that sizing is
+## already warm), so a single `await process_frame` scrolled to a still-too-
+## small max_value and landed short of the bottom. Instead this reapplies
+## scroll_vertical every frame until max_value stops changing (or a small
+## frame cap is hit, so a layout that never settles can't loop forever).
+func _scroll_to_latest_message() -> void:
+	var vscroll := messages_scroll.get_v_scroll_bar()
+	var previous_max := -1.0
+	for _i in 5:
+		await get_tree().process_frame
+		messages_scroll.scroll_vertical = int(vscroll.max_value)
+		if vscroll.max_value == previous_max:
+			break
+		previous_max = vscroll.max_value
+
+
+## Full-width "— 19 สิงหาคม 2569 —" separator row, inserted whenever a
+## message's date differs from the previous message's (or for the thread's
+## very first message) — see _render_chat_pane(). This is its own row, not a
+## bubble: it must stay out of _add_message_bubble's spacer-based left/right
+## alignment trick below, which only makes sense for sender-aligned bubbles.
+func _add_date_divider(date_text: String) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+
+	var left_line := ColorRect.new()
+	left_line.color = Palette.BORDER
+	left_line.custom_minimum_size = Vector2(0, 1)
+	left_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_line.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(left_line)
+
+	var date_label := Label.new()
+	date_label.text = date_text
+	date_label.add_theme_font_override("font", Palette.font_body)
+	date_label.add_theme_font_size_override("font_size", 4)
+	date_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	row.add_child(date_label)
+
+	var right_line := ColorRect.new()
+	right_line.color = Palette.BORDER
+	right_line.custom_minimum_size = Vector2(0, 1)
+	right_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_line.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(right_line)
+
+	messages_list.add_child(row)
 
 
 func _add_message_bubble(message: ChatMessageData) -> void:

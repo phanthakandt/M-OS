@@ -7,42 +7,49 @@
 script = ExtResource("2")
 sender = "เก่ง"
 text = "เฮ้ย พรุ่งนี้ไปติวกันไหม"
+date = "14 สิงหาคม 2569"
 timestamp = "21:02"
 
 [sub_resource type="Resource" id="msg2"]
 script = ExtResource("2")
 sender = "me"
 text = "คงไปไม่ได้ว่ะ ช่วงนี้นอนไม่ค่อยหลับ"
+date = "14 สิงหาคม 2569"
 timestamp = "21:05"
 
 [sub_resource type="Resource" id="msg3"]
 script = ExtResource("2")
 sender = "เก่ง"
 text = "เป็นอะไรอ่ะ ทำงานหนักไปเหรอ"
+date = "14 สิงหาคม 2569"
 timestamp = "21:06"
 
 [sub_resource type="Resource" id="msg4"]
 script = ExtResource("2")
 sender = "me"
 text = "เปล่า เหมือนได้ยินเสียงอะไรในบ้านตลอดเลย"
+date = "14 สิงหาคม 2569"
 timestamp = "21:08"
 
 [sub_resource type="Resource" id="msg5"]
 script = ExtResource("2")
 sender = "เก่ง"
 text = "เสียงอะไร ผีเหรอ 555"
+date = "15 สิงหาคม 2569"
 timestamp = "21:09"
 
 [sub_resource type="Resource" id="msg6"]
 script = ExtResource("2")
 sender = "me"
 text = "ไม่รู้ว่ะ เหมือนมีคนพิมพ์คีย์บอร์ดตอนตีสาม ทั้งที่ไม่มีใครอยู่"
+date = "15 สิงหาคม 2569"
 timestamp = "21:11"
 
 [sub_resource type="Resource" id="msg7"]
 script = ExtResource("2")
 sender = "เก่ง"
 text = "หลอนโว้ย เดี๋ยวพรุ่งนี้โทรหานะ ดูแลตัวเองด้วย"
+date = "15 สิงหาคม 2569"
 timestamp = "21:13"
 
 [resource]

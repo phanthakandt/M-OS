@@ -7,42 +7,49 @@
 script = ExtResource("2")
 sender = "พี่ชาย"
 text = "น้อง ถ้าเห็นข้อความนี้ แปลว่าเครื่องนี้ยังเปิดอยู่"
+date = "12 สิงหาคม 2569"
 timestamp = "23:47"
 
 [sub_resource type="Resource" id="msg2"]
 script = ExtResource("2")
 sender = "พี่ชาย"
 text = "พี่ขอโทษที่ไม่ได้บอกอะไรก่อนหายไป"
+date = "12 สิงหาคม 2569"
 timestamp = "23:49"
 
 [sub_resource type="Resource" id="msg3"]
 script = ExtResource("2")
 sender = "me"
 text = "พี่อยู่ไหน ทำไมไม่กลับบ้านสักที"
+date = "12 สิงหาคม 2569"
 timestamp = "23:52"
 
 [sub_resource type="Resource" id="msg4"]
 script = ExtResource("2")
 sender = "พี่ชาย"
 text = "พี่กลับไม่ได้แล้วน้อง"
+date = "12 สิงหาคม 2569"
 timestamp = "23:54"
 
 [sub_resource type="Resource" id="msg5"]
 script = ExtResource("2")
 sender = "พี่ชาย"
 text = "แค่อยากให้รู้ว่าพี่ยังคิดถึงอยู่เสมอ"
+date = "19 สิงหาคม 2569"
 timestamp = "23:55"
 
 [sub_resource type="Resource" id="msg6"]
 script = ExtResource("2")
 sender = "me"
 text = "พี่..."
+date = "19 สิงหาคม 2569"
 timestamp = "23:57"
 
 [sub_resource type="Resource" id="msg7"]
 script = ExtResource("2")
 sender = "พี่ชาย"
 text = "ดูแลตัวเองด้วยนะ"
+date = "19 สิงหาคม 2569"
 timestamp = "23:59"
 
 [resource]

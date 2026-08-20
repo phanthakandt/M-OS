@@ -7,36 +7,42 @@
 script = ExtResource("2")
 sender = "???"
 text = "อย่าไว้ใจทุกอย่างที่เครื่องนี้บอกคุณ"
+date = "2 กรกฎาคม 2569"
 timestamp = "03:12"
 
 [sub_resource type="Resource" id="msg2"]
 script = ExtResource("2")
 sender = "???"
 text = "มันไม่ใช่คอมพิวเตอร์ธรรมดา"
+date = "2 กรกฎาคม 2569"
 timestamp = "03:13"
 
 [sub_resource type="Resource" id="msg3"]
 script = ExtResource("2")
 sender = "me"
 text = "คุณเป็นใคร ทำไมถึงมีเบอร์ผม"
+date = "2 กรกฎาคม 2569"
 timestamp = "03:15"
 
 [sub_resource type="Resource" id="msg4"]
 script = ExtResource("2")
 sender = "???"
 text = "คนที่เคยอยู่ตรงนั้นมาก่อนคุณ"
+date = "19 สิงหาคม 2569"
 timestamp = "03:16"
 
 [sub_resource type="Resource" id="msg5"]
 script = ExtResource("2")
 sender = "???"
 text = "ระบบจะพยายามทำให้คุณลืมทีละนิด"
+date = "19 สิงหาคม 2569"
 timestamp = "03:18"
 
 [sub_resource type="Resource" id="msg6"]
 script = ExtResource("2")
 sender = "me"
 text = "ลืมอะไร"
+date = "19 สิงหาคม 2569"
 timestamp = "03:19"
 
 [resource]
