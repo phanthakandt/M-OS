@@ -48,6 +48,16 @@ var _code_unlocked_apps: Dictionary = {}
 var _ghost_processes: Array = []
 var _next_ghost_id: int = 0
 
+## Runtime "trash" for MosMail's emails — a separate entity/id-space from
+## _trashed_files/_trashed_folders above (never share the dictionary:
+## FileData and EmailData ids aren't guaranteed unique against each other).
+## Unlike files/folders, there's no can_delete_email/is_protected concept —
+## every email can always be deleted, whichever tab (inbox/spam) it came
+## from, into this one trash. No dedicated signal: MosMailApp just rebuilds
+## itself after every delete/restore call, same as FilesApp does around
+## delete_file().
+var _trashed_emails: Dictionary = {}
+
 
 func _file_key(file: FileData) -> String:
 	if file.id != "":
@@ -256,6 +266,22 @@ func _spawn_ghost_process(process_name: String, hidden: bool, killable: bool) ->
 	_next_ghost_id += 1
 
 
+## email.id is always non-empty by convention (every EmailData in inbox.tres
+## sets one) — no _file_key-style fallback needed.
+func is_email_deleted(email: EmailData) -> bool:
+	return _trashed_emails.has(email.id)
+
+
+func delete_email(email: EmailData) -> void:
+	_trashed_emails[email.id] = email
+
+
+## Restore has no protected/undeletable equivalent, same as files/folders —
+## anything trashed can always be restored.
+func restore_email(email: EmailData) -> void:
+	_trashed_emails.erase(email.id)
+
+
 func reset_progress() -> void:
 	unlocked_files.clear()
 	_trashed_files.clear()
@@ -265,3 +291,4 @@ func reset_progress() -> void:
 	_code_unlocked_apps.clear()
 	_ghost_processes.clear()
 	_next_ghost_id = 0
+	_trashed_emails.clear()

@@ -24,7 +24,6 @@ func open_window(content: Control, title: String, rect: Rect2) -> AppWindow:
 	win.position = rect.position
 	win.size = rect.size
 	win.closed.connect(_on_window_closed)
-	win.focused.connect(_on_window_focused)
 	win.get_content_slot().add_child(content)
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_windows[id] = win
@@ -98,8 +97,28 @@ func _focus_topmost_visible() -> void:
 			return
 
 
-func _on_window_focused(window_id: String) -> void:
-	_focus(window_id)
+## Real-OS-style click-to-focus: a click anywhere on a window (not just its
+## titlebar) should raise it — but only the window actually drawn on top at
+## that point, not any other window whose rect happens to also cover it.
+## This has to be decided centrally, here, rather than by each AppWindow
+## independently checking "does this click fall within my own rect": if two
+## windows overlap and both perform that check, both would call to focus
+## themselves for the same click, and whichever's _input() happened to run
+## last (an ordering Godot doesn't guarantee matches visual stacking) would
+## win — occasionally focusing the window *behind* the one actually clicked.
+## Iterating window_layer's children topmost-first (same "last child =
+## topmost" convention _focus_topmost_visible() uses) and stopping at the
+## first match guarantees the visually topmost window under the cursor is
+## always the one that wins, matching how a real desktop OS resolves this.
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	var children := window_layer.get_children()
+	for i in range(children.size() - 1, -1, -1):
+		var win: AppWindow = children[i]
+		if win.visible and Rect2(win.global_position, win.size).has_point(event.global_position):
+			_focus(win.window_id)
+			return
 
 
 func _focus(window_id: String) -> void:

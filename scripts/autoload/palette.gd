@@ -76,6 +76,25 @@ static func task_item_style_invisible() -> StyleBoxFlat:
 static func start_button_style() -> StyleBoxFlat:
 	return make_flat_style(WINDOW_BG, BORDER_LIGHT, 1, 3)
 
+## Start menu row hover: a flat left-accent-bar indicator, unlike
+## task_item_style()'s all-around box — background fill plus a border
+## reserved only on the left edge. TRANSPARENT (not 0 width) at rest, same
+## reason task_item_style_invisible() stays transparent instead of
+## borderless: border_width_left must stay the same 3px whether hovered or
+## not, or the row's minimum size (and the whole menu's layout) would shift
+## on hover.
+static func start_menu_item_style(hovered: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = TITLEBAR_BG if hovered else TRANSPARENT
+	style.border_width_left = 3
+	style.border_color = BORDER_LIGHT if hovered else TRANSPARENT
+	style.set_corner_radius_all(0)
+	style.content_margin_left = 10
+	style.content_margin_top = 2
+	style.content_margin_right = 24
+	style.content_margin_bottom = 2
+	return style
+
 static func tb_btn_style_accent(accent: Color) -> StyleBoxFlat:
 	return make_flat_style(accent, BORDER, 1)
 
@@ -96,6 +115,31 @@ static func chat_contact_row_style(selected: bool, hovered: bool = false) -> Sty
 ## padding, matching a chat bubble's proportions rather than a list row's.
 static func chat_bubble_style(is_me: bool) -> StyleBoxFlat:
 	return make_flat_style(TITLEBAR_BG if is_me else DESKTOP_BG_2, BORDER, 1, 3)
+
+## MosMail sidebar tab (inbox/spam/trash): same left-accent-bar shape as
+## start_menu_item_style() (background fill + a border reserved only on the
+## left edge, held at a constant width so hover/selection never shifts
+## layout), but kept as its own builder rather than reused/parameterized:
+## start_menu_item_style() only has a hovered bool since start menu items
+## never stay selected, while a sidebar tab needs a persistent selected
+## state independent of hover (selected always wins, same tri-state
+## priority chat_contact_row_style() already uses) — and its content margins
+## are tuned for a ~46px sidebar column, not the start menu's much wider
+## rows. Overloading one signature to cover both would've meant every
+## existing start_menu_item_style() call site also having to pass a
+## meaningless selected argument.
+static func sidebar_tab_style(selected: bool, hovered: bool = false) -> StyleBoxFlat:
+	var bg := TITLEBAR_BG_ACTIVE if selected else (TITLEBAR_BG if hovered else TRANSPARENT)
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_width_left = 2
+	style.border_color = BORDER_LIGHT if selected else TRANSPARENT
+	style.set_corner_radius_all(0)
+	style.content_margin_left = 6
+	style.content_margin_top = 5
+	style.content_margin_right = 6
+	style.content_margin_bottom = 5
+	return style
 
 ## Shared 0..1 corruption progress for both desktop_corruption_color() and
 ## corruption_modulate(), so the eased curve is only written once. Eased

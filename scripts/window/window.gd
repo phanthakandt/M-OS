@@ -2,7 +2,6 @@ class_name AppWindow
 extends Control
 
 signal closed(window_id: String)
-signal focused(window_id: String)
 
 var window_id: String = ""
 var window_title: String = ""
@@ -36,8 +35,6 @@ func _ready() -> void:
 	minimize_button.pressed.connect(_on_minimize_pressed)
 	maximize_button.pressed.connect(_on_maximize_pressed)
 	close_button.pressed.connect(_on_close_pressed)
-	panel.gui_input.connect(_on_panel_gui_input)
-	content_slot.gui_input.connect(_on_panel_gui_input)
 	titlebar_panel.gui_input.connect(_on_titlebar_gui_input)
 
 	set_active(false)
@@ -84,14 +81,12 @@ func _on_maximize_pressed() -> void:
 	_is_maximized = true
 
 
-func _on_panel_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		focused.emit(window_id)
-
-
+## Only initiates dragging — focusing on click is decided centrally by
+## WindowManager._input(), not per-window, so overlapping windows resolve to
+## whichever is actually topmost at the click point (see that function's
+## comment for why a per-window check couldn't guarantee that).
 func _on_titlebar_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		focused.emit(window_id)
 		if not _is_maximized:
 			_dragging = true
 			_drag_offset = get_global_mouse_position() - global_position

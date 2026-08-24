@@ -1,0 +1,134 @@
+[gd_resource type="Resource" script_class="MosMailListData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/mosmail_list_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/resources/email_data.gd" id="2"]
+
+[sub_resource type="Resource" id="mail_it_support"]
+script = ExtResource("2")
+id = "mail_it_support"
+sender = "IT Support"
+subject = "แจ้งเตือนการเข้าถึงระบบ"
+snippet = "ตรวจพบการเข้าสู่ระบบจากอุปกรณ์ที่ไม่รู้จัก"
+content = "เรียนผู้ใช้งาน,
+
+ระบบตรวจพบการเข้าสู่ระบบจากอุปกรณ์ที่ไม่เคยลงทะเบียนไว้ก่อนหน้านี้ เมื่อเวลาประมาณตีสามของคืนที่ผ่านมา หากท่านไม่ได้เป็นผู้เข้าใช้งานด้วยตนเอง กรุณาตรวจสอบความปลอดภัยของบัญชีโดยเร็ว
+
+ฝ่ายสนับสนุนด้านเทคนิค
+IT Support"
+datetime = "12 ก.ค."
+
+[sub_resource type="Resource" id="mail_mos_notice"]
+script = ExtResource("2")
+id = "mail_mos_notice"
+sender = "ระบบ M-OS"
+subject = "รายงานประจำสัปดาห์"
+snippet = "สรุปกิจกรรมของเครื่องในรอบสัปดาห์ที่ผ่านมา"
+content = "รายงานประจำสัปดาห์ — เครื่อง M-OS
+
+ระยะเวลาทำงานสะสม: 041 ชั่วโมง 12 นาที
+สถานะระบบ: ปกติ
+กระบวนการพื้นหลัง: ทำงานตามค่าเริ่มต้น
+
+หมายเหตุ: พบความผิดปกติเล็กน้อยในบันทึกการเข้าใช้งาน แนะนำให้ผู้ใช้ตรวจสอบด้วยตนเองผ่าน SYSTEM.LOG
+
+— ระบบ M-OS (อีเมลอัตโนมัติ ไม่ต้องตอบกลับ)"
+datetime = "เมื่อวาน"
+
+[sub_resource type="Resource" id="mail_brother_old"]
+script = ExtResource("2")
+id = "mail_brother_old"
+sender = "พี่ชาย"
+subject = "ฝากไฟล์ไว้ให้"
+snippet = "เผื่อวันหนึ่งน้องต้องใช้"
+content = "น้อง...
+
+ถ้าน้องอ่านอันนี้เจอ แปลว่าน้องเปิดเครื่องนี้ขึ้นมาอีกครั้งแล้วสินะ
+
+พี่ฝากอะไรไว้ในเครื่องนี้บางอย่าง ไม่ได้อยากให้เป็นภาระอะไรหรอก แค่อยากให้รู้ว่าพี่คิดถึงเรื่องพวกนี้อยู่เสมอ ถ้าเจออะไรแปลกๆ ในเครื่อง อย่าตกใจไป มันอาจจะเป็นแค่ร่องรอยเก่าๆ ของพี่เอง
+
+ดูแลตัวเองด้วยนะ"
+datetime = "3 วันก่อน"
+requires_code = true
+
+[sub_resource type="Resource" id="mail_nattapong_old"]
+script = ExtResource("2")
+id = "mail_nattapong_old"
+sender = "nattapong.w"
+subject = "บันทึกก่อนไป"
+snippet = "ผมทิ้งอะไรไว้บางอย่าง..."
+content = "ถ้ามีใครอ่านอีเมลนี้เจอ...
+
+ผมไม่รู้ว่าจะมีใครมาเปิดเครื่องนี้อีกไหม แต่ถ้าเผื่อมี ผมแค่อยากบอกว่าอย่าไว้ใจทุกอย่างที่เครื่องนี้บอก บางอย่างในนี้ไม่ได้เป็นอย่างที่มันดูเลย
+
+ผมทิ้งบัญชีนี้ไว้แบบนี้แหละ ไม่ได้ปิดมันจริงๆ ก็เพราะคิดว่าสักวันอาจจะมีคนต้องใช้มันอีกครั้ง
+
+— nattapong.w"
+datetime = "12 ก.ค."
+requires_code = true
+
+[sub_resource type="Resource" id="mail_bank_notice"]
+script = ExtResource("2")
+id = "mail_bank_notice"
+sender = "ธนาคาร ABC"
+subject = "ใบแจ้งยอดบัญชีประจำเดือน"
+snippet = "ยอดคงเหลือและรายการเคลื่อนไหวบัญชีของท่าน"
+content = "เรียนลูกค้า,
+
+นี่คือใบแจ้งยอดบัญชีประจำเดือนของท่าน ยอดคงเหลือและรายการเคลื่อนไหวสามารถตรวจสอบได้ผ่านแอปพลิเคชันของธนาคาร หากมีข้อสงสัยกรุณาติดต่อสาขาใกล้บ้านท่าน
+
+ขอบคุณที่ใช้บริการ
+ธนาคาร ABC"
+datetime = "12 ก.ค."
+
+[sub_resource type="Resource" id="mail_spam_lottery"]
+script = ExtResource("2")
+id = "mail_spam_lottery"
+sender = "Mega Lottery Thailand"
+subject = "ยินดีด้วย! คุณถูกรางวัลใหญ่"
+snippet = "กรุณายืนยันตัวตนเพื่อรับรางวัลของคุณ"
+content = "ยินดีด้วย!!!
+
+คุณคือผู้โชคดีที่ได้รับรางวัลใหญ่มูลค่ามหาศาลจากการจับรางวัลประจำปี กรุณากดลิงก์ด้านล่างและกรอกข้อมูลส่วนตัวเพื่อยืนยันสิทธิ์รับรางวัลภายใน 24 ชั่วโมง มิฉะนั้นรางวัลจะถูกยกเลิกโดยอัตโนมัติ
+
+[ลิงก์ยืนยันสิทธิ์]
+
+Mega Lottery Thailand"
+datetime = "2 สัปดาห์ก่อน"
+is_spam = true
+
+[sub_resource type="Resource" id="mail_spam_bank_phish"]
+script = ExtResource("2")
+id = "mail_spam_bank_phish"
+sender = "ธนาคารกรุงไทยไทย"
+subject = "บัญชีของคุณถูกระงับชั่วคราว"
+snippet = "กรุณายืนยันตัวตนโดยเร็วที่สุด มิฉะนั้นบัญชีจะถูกปิด"
+content = "เรียนผู้ใช้บริการ,
+
+บัญชีของท่านถูกระงับการใช้งานชั่วคราวเนื่องจากตรวจพบความเคลื่อนไหวที่ผิดปกติ กรุณายืนยันตัวตนโดยกรอกข้อมูลบัตรและรหัสผ่านผ่านลิงก์ด้านล่างโดยด่วนที่สุด มิฉะนั้นบัญชีของท่านจะถูกปิดถาวรภายใน 24 ชั่วโมง
+
+[ยืนยันตัวตนที่นี่]
+
+ฝ่ายความปลอดภัย
+ธนาคารกรุงไทยไทย"
+datetime = "08:14"
+is_spam = true
+
+[sub_resource type="Resource" id="mail_spam_unknown"]
+script = ExtResource("2")
+id = "mail_spam_unknown"
+sender = "ไม่ทราบชื่อผู้ส่ง"
+subject = "RE: RE: RE: กรุณาอ่านด่วนก่อนสายเกินไป"
+snippet = "กรุณาอ่านข้อความนี้ก่อนที่จะสายเกินไป"
+content = "ส่งต่อ: ส่งต่อ: ส่งต่อ:
+
+กรุณาอ่านข้อความนี้ก่อนที่จะสายเกินไป ส่งต่อให้คนที่คุณรักภายใน 10 นาที มิฉะนั้นสิ่งเลวร้ายจะเกิดขึ้นกับคุณ มีคนที่ไม่ส่งต่อและเกิดเรื่องไม่ดีขึ้นจริงๆ...
+
+(ข้อความลูกโซ่ ไม่ทราบต้นทาง)"
+datetime = "3 วันก่อน"
+is_spam = true
+requires_code = true
+
+[resource]
+script = ExtResource("1")
+access_code = "0817"
+emails = [SubResource("mail_it_support"), SubResource("mail_mos_notice"), SubResource("mail_brother_old"), SubResource("mail_nattapong_old"), SubResource("mail_bank_notice"), SubResource("mail_spam_lottery"), SubResource("mail_spam_bank_phish"), SubResource("mail_spam_unknown")]

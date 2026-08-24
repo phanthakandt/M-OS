@@ -9,6 +9,8 @@ const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 const TASK_MANAGER_SCENE := preload("res://scenes/apps/TaskManagerApp.tscn")
 const TRASH_APP_SCENE := preload("res://scenes/apps/TrashApp.tscn")
 const KIKUCHAT_SCENE := preload("res://scenes/apps/KikuChatApp.tscn")
+const SYSTEM_LOG_SCENE := preload("res://scenes/apps/SystemLogApp.tscn")
+const MOSMAIL_SCENE := preload("res://scenes/apps/MosMailApp.tscn")
 
 ## readme.txt is a file like any other — not an app — so it's backed by a
 ## real FileData (with blobs) instead of being a hardcoded special case.
@@ -25,6 +27,7 @@ const README_FILE := preload("res://data/files/readme.tres")
 @onready var readme_icon: DesktopIconUI = $TopRightIconGrid/ReadmeIcon
 @onready var trash_icon: DesktopIconUI = $IconGrid/TrashIcon
 @onready var kikuchat_icon: DesktopIconUI = $IconGrid/KikuChatIcon
+@onready var mosmail_icon: DesktopIconUI = $IconGrid/MosMailIcon
 @onready var taskbar: Control = $Taskbar
 @onready var taskbar_panel: Panel = $Taskbar/Panel
 @onready var start_button: Button = $Taskbar/Panel/HBox/StartButton
@@ -87,18 +90,22 @@ func _ready() -> void:
 	_wire_icon(readme_icon, "T", "readme.txt", Callable(self, "_open_readme"), Callable(self, "_delete_readme"), Callable(self, "_open_readme_devcrack"))
 	_wire_icon(trash_icon, "X", "trash", Callable(self, "_open_trash_app"))
 	_wire_icon(kikuchat_icon, "K", "KikuChat", Callable(self, "_open_kikuchat"))
+	_wire_icon(mosmail_icon, "@", "MosMail", Callable(self, "_open_mosmail"))
 
 	readme_icon.visible = not GameState.is_readme_deleted()
 	GameState.trashed_changed.connect(_on_trashed_changed)
 
+	# group 0 = navigation, group 1 = power — _build_start_menu() inserts a
+	# divider wherever this changes between consecutive items, so adding or
+	# removing an entry never needs a hardcoded divider position.
 	_start_menu_items = [
-		{"label": "my drive", "action": Callable(self, "_open_files_app")},
-		{"label": "trash", "action": Callable(self, "_open_trash_app")},
-		{"label": "system log", "action": Callable(self, "_open_system_log")},
-		{"label": "task manager", "action": Callable(self, "_open_task_manager")},
-		{"label": "restart", "action": Callable(self, "_restart_os")},
-		{"label": "logout", "action": Callable(self, "_logout")},
-		{"label": "shutdown", "action": Callable(self, "_confirm_shutdown")},
+		{"label": "my drive", "action": Callable(self, "_open_files_app"), "glyph": "D", "group": 0},
+		{"label": "trash", "action": Callable(self, "_open_trash_app"), "glyph": "X", "group": 0},
+		{"label": "system log", "action": Callable(self, "_open_system_log"), "glyph": "L", "group": 0},
+		{"label": "task manager", "action": Callable(self, "_open_task_manager"), "glyph": "T", "group": 0},
+		{"label": "restart", "action": Callable(self, "_restart_os"), "glyph": "R", "group": 1},
+		{"label": "logout", "action": Callable(self, "_logout"), "glyph": "O", "group": 1},
+		{"label": "shutdown", "action": Callable(self, "_confirm_shutdown"), "glyph": "!", "group": 1},
 	]
 	_build_start_menu()
 
@@ -195,6 +202,16 @@ func _open_kikuchat() -> void:
 	content.warning_dialog = _warning_dialog
 	var win := window_manager.open_window(content, "KikuChat", Rect2(45, 15, 190, 150))
 	_singleton_windows["kikuchat"] = win.window_id
+
+
+func _open_mosmail() -> void:
+	if _focus_if_open("mosmail"):
+		return
+	var content: MosMailApp = MOSMAIL_SCENE.instantiate()
+	content.window_manager = window_manager
+	content.warning_dialog = _warning_dialog
+	var win := window_manager.open_window(content, "MosMail", Rect2(30, 15, 260, 170))
+	_singleton_windows["mosmail"] = win.window_id
 
 
 func _focus_if_open(key: String) -> bool:
@@ -299,22 +316,115 @@ func _build_start_menu() -> void:
 	_start_menu_layer.add_child(_start_menu_panel)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", -1)
+	vbox.add_theme_constant_override("separation", 0)
 	_start_menu_panel.add_child(vbox)
 
+	_build_start_menu_header(vbox)
+
+	var previous_group := -1
 	for item in _start_menu_items:
-		var btn := Button.new()
-		btn.text = item.label
-		btn.focus_mode = Control.FOCUS_NONE
-		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		btn.add_theme_font_override("font", Palette.font_body)
-		btn.add_theme_font_size_override("font_size", 5)
-		btn.add_theme_color_override("font_color", Palette.TEXT_MAIN)
-		btn.add_theme_stylebox_override("normal", Palette.task_item_style())
-		btn.add_theme_stylebox_override("hover", Palette.task_item_style())
-		btn.add_theme_stylebox_override("pressed", Palette.task_item_style())
-		btn.pressed.connect(_on_start_menu_item_pressed.bind(item.action as Callable))
-		vbox.add_child(btn)
+		if previous_group != -1 and item.group != previous_group:
+			_add_start_menu_divider(vbox)
+		previous_group = item.group
+		_add_start_menu_item(vbox, item)
+
+
+## "signed in as" / PlayerIdentity.player_name, with a divider below
+## separating it from the item list — PlayerIdentity is set once at login
+## (see login_screen.gd) and never touched again here.
+func _build_start_menu_header(vbox: VBoxContainer) -> void:
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_right", 24)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	vbox.add_child(margin)
+
+	var lines := VBoxContainer.new()
+	lines.add_theme_constant_override("separation", 0)
+	margin.add_child(lines)
+
+	var signed_in_label := Label.new()
+	signed_in_label.text = "signed in as"
+	signed_in_label.add_theme_font_override("font", Palette.font_body)
+	signed_in_label.add_theme_font_size_override("font_size", 4)
+	signed_in_label.add_theme_color_override("font_color", Palette.TEXT_FAINT)
+	lines.add_child(signed_in_label)
+
+	var player_name_label := Label.new()
+	player_name_label.text = PlayerIdentity.player_name
+	player_name_label.add_theme_font_override("font", Palette.font_body)
+	player_name_label.add_theme_font_size_override("font_size", 6)
+	player_name_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
+	lines.add_child(player_name_label)
+
+	_add_start_menu_divider(vbox)
+
+
+## Plain 1px Palette.BORDER line — used both below the header and between
+## the navigation/power item groups (see _build_start_menu()'s group check).
+func _add_start_menu_divider(vbox: VBoxContainer) -> void:
+	var divider := ColorRect.new()
+	divider.color = Palette.BORDER
+	divider.custom_minimum_size = Vector2(0, 1)
+	vbox.add_child(divider)
+
+
+## One start menu row: a glyph box (same icon_glyph_style() box DesktopIconUI
+## uses, just sized for a menu row instead of a desktop icon) plus a label,
+## in a PanelContainer whose own stylebox is the left-accent-bar hover state
+## (see Palette.start_menu_item_style()) — same "swap stylebox on
+## mouse_entered/exited" pattern TaskManagerApp's rows use. "shutdown" is the
+## one row styled differently: ACCENT_WARN on both the glyph border and the
+## label, signaling it's the destructive action, same color TaskManagerApp/
+## ConfirmDialog already use for danger — never a hardcoded Color(...).
+func _add_start_menu_item(vbox: VBoxContainer, item: Dictionary) -> void:
+	var is_shutdown: bool = item.label == "shutdown"
+
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", Palette.start_menu_item_style(false))
+	row.gui_input.connect(_on_start_menu_row_gui_input.bind(item.action as Callable))
+	row.mouse_entered.connect(func() -> void: row.add_theme_stylebox_override("panel", Palette.start_menu_item_style(true)))
+	row.mouse_exited.connect(func() -> void: row.add_theme_stylebox_override("panel", Palette.start_menu_item_style(false)))
+
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	row.add_child(hbox)
+
+	var glyph_box := Panel.new()
+	glyph_box.custom_minimum_size = Vector2(10, 10)
+	glyph_box.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	glyph_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var glyph_style := Palette.make_flat_style(Palette.WINDOW_BG, Palette.ACCENT_WARN, 1) if is_shutdown else Palette.icon_glyph_style()
+	glyph_box.add_theme_stylebox_override("panel", glyph_style)
+	hbox.add_child(glyph_box)
+
+	var glyph_label := Label.new()
+	glyph_label.text = item.glyph
+	glyph_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glyph_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	glyph_label.add_theme_font_override("font", Palette.font_body)
+	glyph_label.add_theme_font_size_override("font_size", 4)
+	# TEXT_DIM reads fine against icon_glyph_style()'s WINDOW_BG fill — same
+	# pairing DesktopIconUI's own glyph already uses.
+	glyph_label.add_theme_color_override("font_color", Palette.ACCENT_WARN if is_shutdown else Palette.TEXT_DIM)
+	glyph_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	glyph_box.add_child(glyph_label)
+
+	var label := Label.new()
+	label.text = item.label
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_override("font", Palette.font_body)
+	label.add_theme_font_size_override("font_size", 5)
+	label.add_theme_color_override("font_color", Palette.ACCENT_WARN if is_shutdown else Palette.TEXT_MAIN)
+	hbox.add_child(label)
+
+	vbox.add_child(row)
+
+
+func _on_start_menu_row_gui_input(event: InputEvent, action: Callable) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_on_start_menu_item_pressed(action)
 
 
 func _on_start_menu_item_pressed(action: Callable) -> void:
@@ -352,17 +462,16 @@ func _open_system_log() -> void:
 	if _focus_if_open("sys_log"):
 		return
 
-	var content := Control.new()
-	var lbl := Label.new()
-	lbl.text = "idle... idle... idle...\nprocess m-os_core: running\nuptime: 041:12:07"
-	lbl.add_theme_font_override("font", Palette.font_body)
-	lbl.add_theme_font_size_override("font_size", 5)
-	lbl.add_theme_color_override("font_color", Palette.TEXT_FAINT)
-	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
-	lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content.add_child(lbl)
-
-	var win := window_manager.open_window(content, "SYSTEM.LOG", Rect2(204, 23, 109, 70))
+	var content: SystemLogApp = SYSTEM_LOG_SCENE.instantiate()
+	# Was Rect2(204, 23, 109, 70) back when this opened a single 3-line Label —
+	# far too small for a real multi-column log (datetime + level tag +
+	# message + actor per row). 220, then 310, were still narrow enough that
+	# rows wrapped onto a second line via HFlowContainer, unlike the
+	# reference mockup where every row fits on one line — widened again to
+	# fit DATETIME_WIDTH + a level tag + MESSAGE_MIN_WIDTH + ACTOR_WIDTH side
+	# by side at the window's default size, now that actor also has a fixed
+	# floor width (see SystemLogApp.ACTOR_WIDTH).
+	var win := window_manager.open_window(content, "SYSTEM.LOG", Rect2(20, 15, 340, 180))
 	_singleton_windows["sys_log"] = win.window_id
 
 

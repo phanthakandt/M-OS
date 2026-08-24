@@ -30,7 +30,7 @@ layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 32.0
-offset_bottom = 150.0
+offset_bottom = 195.0
 theme_override_constants/separation = 7
 
 [node name="DriveIcon" parent="IconGrid" unique_id=253294774 instance=ExtResource("3")]
@@ -38,6 +38,8 @@ theme_override_constants/separation = 7
 [node name="TrashIcon" parent="IconGrid" unique_id=421827127 instance=ExtResource("3")]
 
 [node name="KikuChatIcon" parent="IconGrid" instance=ExtResource("3")]
+
+[node name="MosMailIcon" parent="IconGrid" instance=ExtResource("3")]
 
 [node name="TopRightIconGrid" type="VBoxContainer" parent="." unique_id=217379100]
 layout_mode = 0
