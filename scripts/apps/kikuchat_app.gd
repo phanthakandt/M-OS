@@ -229,10 +229,12 @@ func _render_chat_pane() -> void:
 
 	chat_header.text = _selected_thread.contact_name
 	var previous_date := ""
+	var is_first_message := true
 	for message in _selected_thread.messages:
-		if message.date != previous_date:
+		if is_first_message or message.date != previous_date:
 			_add_date_divider(message.date)
 			previous_date = message.date
+			is_first_message = false
 		_add_message_bubble(message)
 
 	_scroll_to_latest_message()

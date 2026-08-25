@@ -146,6 +146,18 @@ func _update_corruption_tint() -> void:
 	corruption_modulate.color = Palette.corruption_modulate(ghost_count)
 
 
+## TEMPORARY DEBUG TOOL — F9 forces the ghost-process count to max so
+## corruption-tint readability (background + CanvasModulate stacked at full
+## saturation) can be checked against real app windows without dozens of
+## REPACK presses. OS.has_feature("debug") is true in editor runs and debug
+## exports only, never in a release export, but that alone isn't a reason to
+## leave this in — remove this whole function (and the debug method it
+## calls, GameState.debug_max_out_ghost_processes()) before shipping.
+func _input(event: InputEvent) -> void:
+	if OS.has_feature("debug") and event is InputEventKey and event.pressed and event.keycode == KEY_F9:
+		GameState.debug_max_out_ghost_processes()
+
+
 func _open_readme() -> void:
 	if _focus_if_open("readme"):
 		return

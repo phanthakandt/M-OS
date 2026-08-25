@@ -254,6 +254,19 @@ func get_ghost_process_count() -> int:
 	return _ghost_processes.size()
 
 
+## TEMPORARY DEBUG TOOL — not a real game feature, do not build UI/gameplay
+## on top of this. Forces the ghost-process count straight to max_count by
+## spawning "lived.process" entries directly, so corruption-tint readability
+## (see Desktop._update_corruption_tint()) can be checked at full saturation
+## without dozens of real REPACK presses. Called only from Desktop._input()
+## behind an OS.has_feature("debug") guard — remove both this method and
+## that call site before shipping, rather than relying on the guard alone.
+func debug_max_out_ghost_processes(max_count: int = 15) -> void:
+	while _ghost_processes.size() < max_count:
+		_spawn_ghost_process("lived.process", false, true)
+	ghost_processes_changed.emit()
+
+
 ## Shared by on_devcrack_repacked() and kill_ghost_process()'s cascade, so
 ## id-assignment and the entry shape only live in one place.
 func _spawn_ghost_process(process_name: String, hidden: bool, killable: bool) -> void:

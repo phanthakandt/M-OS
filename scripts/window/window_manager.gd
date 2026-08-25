@@ -3,7 +3,6 @@ extends Node
 
 signal window_opened(window_id: String, title: String)
 signal window_closed(window_id: String)
-signal window_focus_changed(window_id: String)
 
 const WINDOW_SCENE := preload("res://scenes/window/Window.tscn")
 
@@ -129,4 +128,3 @@ func _focus(window_id: String) -> void:
 	_active_id = window_id
 	window_layer.move_child(_windows[window_id], window_layer.get_child_count() - 1)
 	_windows[window_id].set_active(true)
-	window_focus_changed.emit(window_id)
