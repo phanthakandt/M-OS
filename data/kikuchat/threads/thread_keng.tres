@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/resources/chat_thread_data.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/resources/chat_message_data.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://dy6wrbcq1ld1j" path="res://assets/pictures/images.jpg" id="3"]
 
 [sub_resource type="Resource" id="msg1"]
 script = ExtResource("2")
@@ -52,10 +53,18 @@ text = "หลอนโว้ย เดี๋ยวพรุ่งนี้โ�
 date = "15 สิงหาคม 2569"
 timestamp = "21:13"
 
+[sub_resource type="Resource" id="msg8"]
+script = ExtResource("2")
+sender = "เก่ง"
+text = ""
+date = "15 สิงหาคม 2569"
+timestamp = "21:15"
+image = ExtResource("3")
+
 [resource]
 script = ExtResource("1")
 id = "keng_chat"
 contact_name = "เก่ง"
-last_message_preview = "หลอนโว้ย เดี๋ยวพรุ่งนี้โทรหานะ ดูแลตัวเองด้วย"
+last_message_preview = "[รูปภาพ]"
 requires_code = false
-messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5"), SubResource("msg6"), SubResource("msg7")]
+messages = [SubResource("msg1"), SubResource("msg2"), SubResource("msg3"), SubResource("msg4"), SubResource("msg5"), SubResource("msg6"), SubResource("msg7"), SubResource("msg8")]

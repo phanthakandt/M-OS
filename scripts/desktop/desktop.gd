@@ -146,16 +146,26 @@ func _update_corruption_tint() -> void:
 	corruption_modulate.color = Palette.corruption_modulate(ghost_count)
 
 
-## TEMPORARY DEBUG TOOL — F9 forces the ghost-process count to max so
-## corruption-tint readability (background + CanvasModulate stacked at full
-## saturation) can be checked against real app windows without dozens of
-## REPACK presses. OS.has_feature("debug") is true in editor runs and debug
-## exports only, never in a release export, but that alone isn't a reason to
-## leave this in — remove this whole function (and the debug method it
-## calls, GameState.debug_max_out_ghost_processes()) before shipping.
+## TEMPORARY DEBUG TOOL — Ctrl+Shift+G forces the ghost-process count to max
+## so corruption-tint readability (background + CanvasModulate stacked at
+## full saturation) can be checked against real app windows without dozens
+## of REPACK presses. Deliberately NOT a bare function key: F5-F8 are
+## Godot's own play/pause/stop shortcuts and F9-F11 are the script editor's
+## breakpoint/step shortcuts — pressing one of those while the editor (not
+## the running game) has focus toggles a breakpoint instead, which can pause
+## the entire engine the next time execution reaches that line and looks
+## exactly like the game freezing. `not event.echo` stops holding the combo
+## from re-triggering this on every OS key-repeat tick. OS.has_feature
+## ("debug") is true in editor runs and debug exports only, never in a
+## release export, but that alone isn't a reason to leave this in — remove
+## this whole function (and the debug method it calls,
+## GameState.debug_max_out_ghost_processes()) before shipping.
 func _input(event: InputEvent) -> void:
-	if OS.has_feature("debug") and event is InputEventKey and event.pressed and event.keycode == KEY_F9:
-		GameState.debug_max_out_ghost_processes()
+	if not OS.has_feature("debug"):
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_G and event.ctrl_pressed and event.shift_pressed:
+			GameState.debug_max_out_ghost_processes()
 
 
 func _open_readme() -> void:

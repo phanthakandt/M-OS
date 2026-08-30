@@ -304,14 +304,51 @@ func _add_message_bubble(message: ChatMessageData) -> void:
 	var bubble := PanelContainer.new()
 	bubble.add_theme_stylebox_override("panel", Palette.chat_bubble_style(is_me))
 
-	var text_label := Label.new()
-	text_label.text = message.text
-	text_label.custom_minimum_size = Vector2(BUBBLE_WIDTH, 0)
-	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	text_label.add_theme_font_override("font", Palette.font_body)
-	text_label.add_theme_font_size_override("font_size", 5)
-	text_label.add_theme_color_override("font_color", Palette.TEXT_MAIN)
-	bubble.add_child(text_label)
+	# A bubble can hold an image, text, or both stacked — PanelContainer only
+	# lays out a single child, so both go inside one inner VBox instead of
+	# being added to bubble directly.
+	var bubble_content := VBoxContainer.new()
+	bubble_content.add_theme_constant_override("separation", 3)
+	bubble.add_child(bubble_content)
+
+	if message.image:
+		var image_rect := TextureRect.new()
+		image_rect.texture = message.image
+		# custom_minimum_size drives both dimensions explicitly — height
+		# computed by hand from the texture's own aspect ratio at
+		# BUBBLE_WIDTH, same fixed-width-grows-vertically idea as the text
+		# label below.
+		var texture_size: Vector2 = message.image.get_size()
+		var scaled_height: float = BUBBLE_WIDTH * (texture_size.y / texture_size.x) if texture_size.x > 0 else 0.0
+		image_rect.custom_minimum_size = Vector2(BUBBLE_WIDTH, scaled_height)
+		# EXPAND_IGNORE_SIZE is required for custom_minimum_size above to
+		# matter at all: TextureRect's default expand_mode (EXPAND_KEEP_SIZE)
+		# reports the texture's own native pixel size as its minimum size
+		# regardless of custom_minimum_size, so a full-resolution photo
+		# rendered at its actual (much larger) size instead of shrinking to
+		# fit the bubble. IGNORE_SIZE makes it respect the size it's actually
+		# assigned instead. STRETCH_SCALE then fills that box — no filter
+		# override needed, this is the first actual image sprite anywhere in
+		# the game, so it's the first thing to notice project.godot's
+		# textures/canvas_textures/default_texture_filter = Nearest, already
+		# set for exactly this (see Display settings above).
+		image_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		image_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		bubble_content.add_child(image_rect)
+
+	# Skipped entirely for empty text (an image-only message) rather than
+	# added-but-empty — same convention SystemLogApp/MosMailApp use for a
+	# blank actor/no-op field.
+	if message.text != "":
+		var text_label := Label.new()
+		text_label.text = message.text
+		text_label.custom_minimum_size = Vector2(BUBBLE_WIDTH, 0)
+		text_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		text_label.add_theme_font_override("font", Palette.font_body)
+		text_label.add_theme_font_size_override("font_size", 5)
+		text_label.add_theme_color_override("font_color", Palette.TEXT_MAIN)
+		bubble_content.add_child(text_label)
+
 	bubble_box.add_child(bubble)
 
 	var timestamp_label := Label.new()
