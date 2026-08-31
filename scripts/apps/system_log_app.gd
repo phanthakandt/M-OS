@@ -29,13 +29,18 @@ const ACTOR_WIDTH := 65.0
 @onready var scroll: ScrollContainer = $VBox/Scroll
 @onready var list: VBoxContainer = $VBox/Scroll/List
 
+## Bumped every time _scroll_to_latest_entry() starts a new scroll — lets an
+## in-flight loop notice a newer call has superseded it (see that function)
+## instead of two loops racing to set scroll_vertical every frame.
+var _scroll_generation: int = 0
+
 
 func _ready() -> void:
 	header_label.add_theme_font_override("font", Palette.font_chrome)
 	header_label.add_theme_font_size_override("font_size", 4)
 	header_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
 
-	_style_scrollbar(scroll)
+	Palette.style_scrollbar(scroll)
 
 	# LOG_LIST is static content only — nothing here is tied to GameState yet,
 	# so there's no signal to subscribe for a live rebuild (unlike TrashApp's
@@ -43,17 +48,6 @@ func _ready() -> void:
 	# dynamic source (e.g. entries generated from GameState events), add the
 	# equivalent signal subscription here too.
 	_rebuild_list()
-
-
-## Same thin/reskinned scrollbar as TaskManagerApp/KikuChatApp — copied
-## directly rather than factored into a shared helper, out of scope here.
-func _style_scrollbar(target: ScrollContainer) -> void:
-	var vscroll := target.get_v_scroll_bar()
-	vscroll.custom_minimum_size = Vector2(3, 0)
-	vscroll.add_theme_stylebox_override("scroll", Palette.make_flat_style(Palette.WINDOW_BG, Palette.BORDER, 0))
-	vscroll.add_theme_stylebox_override("grabber", Palette.make_flat_style(Palette.BORDER_LIGHT, Palette.BORDER_LIGHT, 0))
-	vscroll.add_theme_stylebox_override("grabber_highlight", Palette.make_flat_style(Palette.TEXT_DIM, Palette.TEXT_DIM, 0))
-	vscroll.add_theme_stylebox_override("grabber_pressed", Palette.make_flat_style(Palette.TEXT_MAIN, Palette.TEXT_MAIN, 0))
 
 
 func _rebuild_list() -> void:
@@ -158,11 +152,19 @@ func _log_level_style(level: String) -> StyleBoxFlat:
 ## settling that layout can take more than one frame — so this reapplies
 ## scroll_vertical every frame until max_value stops changing (capped at 5
 ## frames so a layout that never settles can't loop forever).
+## _scroll_generation guards against a second call landing mid-loop, the same
+## way KikuChatApp's does: each call bumps it and captures its own value, and
+## the loop bails the instant that no longer matches — the newest call always
+## wins instead of two loops racing to set scroll_vertical on the same frame.
 func _scroll_to_latest_entry() -> void:
+	_scroll_generation += 1
+	var my_generation := _scroll_generation
 	var vscroll := scroll.get_v_scroll_bar()
 	var previous_max := -1.0
 	for _i in 5:
 		await get_tree().process_frame
+		if my_generation != _scroll_generation:
+			break
 		scroll.scroll_vertical = int(vscroll.max_value)
 		if vscroll.max_value == previous_max:
 			break

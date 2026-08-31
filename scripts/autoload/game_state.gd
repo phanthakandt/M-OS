@@ -3,12 +3,6 @@ extends Node
 signal trashed_changed
 signal ghost_processes_changed
 
-## Runtime progress, keyed by FileData.id (falls back to resource_path).
-## Never mutate FileData resources directly — preloaded resources are cached
-## singletons for the process's lifetime, so in-place mutation would leak
-## across sessions/new games.
-var unlocked_files: Dictionary = {}
-
 ## Runtime "trash": entries the player has deleted, tracked here rather than
 ## by mutating FolderData.subfolders/FileData arrays (immutability rule).
 ## Deleting a folder moves the whole folder — with everything inside it — to
@@ -155,14 +149,6 @@ func set_archive_entry_disabled(file: FileData, entry_id: String, disabled: bool
 	_disabled_archive_entries[key][entry_id] = disabled
 
 
-func is_unlocked(file: FileData) -> bool:
-	return unlocked_files.get(_file_key(file), false)
-
-
-func mark_unlocked(file: FileData) -> void:
-	unlocked_files[_file_key(file)] = true
-
-
 enum LockReason { UNLOCKED, PROTECTED, CORRUPTED }
 
 ## Computes *why* a file is locked, not just whether. PROTECTED means a
@@ -176,9 +162,6 @@ enum LockReason { UNLOCKED, PROTECTED, CORRUPTED }
 ## Both conditions are reversible: re-enabling the relevant entry clears
 ## them, same as everything else in this dictionary-backed session state.
 func get_lock_reason(file: FileData) -> int:
-	if is_unlocked(file):
-		return LockReason.UNLOCKED
-
 	var protected_active := false
 	var corrupted := false
 	for blob in file.blobs:
@@ -296,7 +279,6 @@ func restore_email(email: EmailData) -> void:
 
 
 func reset_progress() -> void:
-	unlocked_files.clear()
 	_trashed_files.clear()
 	_trashed_folders.clear()
 	_readme_deleted = false

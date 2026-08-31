@@ -1,7 +1,7 @@
 class_name DevCrackApp
 extends Control
 
-signal file_repacked(file_data: FileData, unlocked: bool)
+signal file_repacked(file_data: FileData)
 
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
 
@@ -38,11 +38,15 @@ func _ready() -> void:
 	_show_state("")
 
 
-## Called by FilesApp after open_window, per the app-configuration convention.
-## DevCrack is never gated by a file's lock state — it's the tool that acts
-## on that state (see _on_entry_context_item_selected/_on_repack_pressed),
-## so it must always be enterable regardless of it. Only FilesApp._open_file
-## respects GameState.is_locked(file).
+## Called by FilesApp._open_devcrack and Desktop._open_readme_devcrack after
+## open_window, per the app-configuration convention. The two call sites
+## differ in one respect: FilesApp also connects file_repacked (so its file
+## list can react to a repack — see _on_file_repacked), while Desktop does
+## not, since readme.txt isn't part of any list FilesApp would need to
+## refresh. DevCrack is never gated by a file's lock state — it's the tool
+## that acts on that state (see _on_entry_context_item_selected/
+## _on_repack_pressed), so it must always be enterable regardless of it.
+## Only FilesApp._open_file/Desktop._open_readme respect GameState.is_locked(file).
 func unpack(file: FileData) -> void:
 	current_file = file
 	header_label.text = "%s.%s" % [file.filename, file.extension]
@@ -62,8 +66,8 @@ func _rebuild_entry_list() -> void:
 ## has touched it — every row starts out looking identical (aside from
 ## whatever last_modified flavor text it carries), and only the player's own
 ## disable/enable toggling ever changes a row's look, or the puzzle gives
-## itself away. copy/paste/disable-enable live in a right-click menu (see
-## _on_entry_row_gui_input), not as always-visible buttons.
+## itself away. The disable/enable toggle lives in a right-click menu (see
+## _on_entry_row_gui_input), not as an always-visible button.
 func _add_entry_row(blob: BlobData) -> void:
 	var base_text: String
 	if blob.filename != "":
@@ -108,8 +112,6 @@ func _on_entry_row_gui_input(event: InputEvent, blob: BlobData) -> void:
 		_context_target_blob = blob
 		var toggle_label := "Enable" if GameState.is_archive_entry_disabled(current_file, blob.id) else "Disable"
 		_context_menu.open_at(get_global_mouse_position(), [
-			{"label": "Copy", "action": "copy"},
-			{"label": "Paste", "action": "paste"},
 			{"label": toggle_label, "action": "toggle"},
 		])
 
@@ -121,9 +123,6 @@ func _on_entry_context_item_selected(action: String) -> void:
 		var currently_disabled := GameState.is_archive_entry_disabled(current_file, _context_target_blob.id)
 		GameState.set_archive_entry_disabled(current_file, _context_target_blob.id, not currently_disabled)
 		_rebuild_entry_list()
-	elif action == "copy" or action == "paste":
-		if warning_dialog:
-			warning_dialog.show_message("ยังไม่รองรับฟังก์ชันนี้")
 
 
 ## REPACK is never blocked by the current archive state, and never judges
@@ -136,8 +135,7 @@ func _on_entry_context_item_selected(action: String) -> void:
 ## outcome (see GameState.on_devcrack_repacked()).
 func _on_repack_pressed() -> void:
 	GameState.on_devcrack_repacked()
-	var unlocked := GameState.get_lock_reason(current_file) == GameState.LockReason.UNLOCKED
-	file_repacked.emit(current_file, unlocked)
+	file_repacked.emit(current_file)
 	if warning_dialog:
 		warning_dialog.show_message("repack เสร็จสิ้น")
 	if window_manager and self_window_id != "":

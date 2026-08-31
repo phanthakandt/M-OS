@@ -32,6 +32,11 @@ var _selected_thread: ChatThreadData
 
 var _password_dialog: PasswordDialog
 
+## Bumped every time _scroll_to_latest_message() starts a new scroll — lets
+## an in-flight loop notice a newer call has superseded it (see that
+## function) instead of two loops racing to set scroll_vertical every frame.
+var _scroll_generation: int = 0
+
 @onready var sidebar_header: Label = $HBox/Sidebar/SidebarHeader
 @onready var contacts_scroll: ScrollContainer = $HBox/Sidebar/ContactsScroll
 @onready var contacts_list: VBoxContainer = $HBox/Sidebar/ContactsScroll/ContactsList
@@ -69,25 +74,14 @@ func _ready() -> void:
 	input_field.add_theme_color_override("font_uneditable_color", Palette.TEXT_FAINT)
 	input_field.add_theme_stylebox_override("read_only", Palette.task_item_style())
 
-	_style_scrollbar(contacts_scroll)
-	_style_scrollbar(messages_scroll)
+	Palette.style_scrollbar(contacts_scroll)
+	Palette.style_scrollbar(messages_scroll)
 
 	_password_dialog = PASSWORD_DIALOG_SCENE.instantiate()
 	add_child(_password_dialog)
 
 	_rebuild_sidebar()
 	_render_chat_pane()
-
-
-## Same thin/reskinned scrollbar as TaskManagerApp — the engine's default
-## width reads oversized against this app's tiny fonts/rows too.
-func _style_scrollbar(scroll: ScrollContainer) -> void:
-	var vscroll := scroll.get_v_scroll_bar()
-	vscroll.custom_minimum_size = Vector2(3, 0)
-	vscroll.add_theme_stylebox_override("scroll", Palette.make_flat_style(Palette.WINDOW_BG, Palette.BORDER, 0))
-	vscroll.add_theme_stylebox_override("grabber", Palette.make_flat_style(Palette.BORDER_LIGHT, Palette.BORDER_LIGHT, 0))
-	vscroll.add_theme_stylebox_override("grabber_highlight", Palette.make_flat_style(Palette.TEXT_DIM, Palette.TEXT_DIM, 0))
-	vscroll.add_theme_stylebox_override("grabber_pressed", Palette.make_flat_style(Palette.TEXT_MAIN, Palette.TEXT_MAIN, 0))
 
 
 func _rebuild_sidebar() -> void:
@@ -251,11 +245,20 @@ func _render_chat_pane() -> void:
 ## small max_value and landed short of the bottom. Instead this reapplies
 ## scroll_vertical every frame until max_value stops changing (or a small
 ## frame cap is hit, so a layout that never settles can't loop forever).
+## _scroll_generation guards against a second call landing mid-loop (e.g. the
+## player switches threads again before the first scroll settles): each call
+## bumps it and captures its own value, and the loop bails the instant that
+## no longer matches — the newest call always wins instead of two loops
+## racing to set scroll_vertical on the same frame.
 func _scroll_to_latest_message() -> void:
+	_scroll_generation += 1
+	var my_generation := _scroll_generation
 	var vscroll := messages_scroll.get_v_scroll_bar()
 	var previous_max := -1.0
 	for _i in 5:
 		await get_tree().process_frame
+		if my_generation != _scroll_generation:
+			break
 		messages_scroll.scroll_vertical = int(vscroll.max_value)
 		if vscroll.max_value == previous_max:
 			break

@@ -318,7 +318,7 @@ func _open_devcrack(file: FileData) -> void:
 	content.unpack(file)
 
 
-func _on_file_repacked(_file: FileData, _unlocked: bool) -> void:
+func _on_file_repacked(_file: FileData) -> void:
 	_rebuild_list()
 
 

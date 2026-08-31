@@ -59,16 +59,7 @@ func _ready() -> void:
 	hidden_toggle_button.toggled.connect(_on_hidden_toggled)
 	_update_hidden_toggle_text(hidden_toggle_button.button_pressed)
 
-	# The engine's default VScrollBar width is sized for a normal-DPI UI, not
-	# this 384x216-space pixel UI — left alone it reads as oversized next to
-	# the tiny font/rows, so it's thinned and reskinned with flat Palette
-	# styles to match everything else here (see task_item_style() callers).
-	var vscroll := scroll.get_v_scroll_bar()
-	vscroll.custom_minimum_size = Vector2(3, 0)
-	vscroll.add_theme_stylebox_override("scroll", Palette.make_flat_style(Palette.WINDOW_BG, Palette.BORDER, 0))
-	vscroll.add_theme_stylebox_override("grabber", Palette.make_flat_style(Palette.BORDER_LIGHT, Palette.BORDER_LIGHT, 0))
-	vscroll.add_theme_stylebox_override("grabber_highlight", Palette.make_flat_style(Palette.TEXT_DIM, Palette.TEXT_DIM, 0))
-	vscroll.add_theme_stylebox_override("grabber_pressed", Palette.make_flat_style(Palette.TEXT_MAIN, Palette.TEXT_MAIN, 0))
+	Palette.style_scrollbar(scroll)
 
 	if window_manager:
 		window_manager.window_opened.connect(_on_window_list_changed)

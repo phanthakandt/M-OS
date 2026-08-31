@@ -127,7 +127,7 @@ func _ready() -> void:
 	detail_meta_label.add_theme_font_size_override("font_size", 5)
 	detail_meta_label.add_theme_color_override("font_color", Palette.TEXT_DIM)
 
-	_style_scrollbar(list_scroll)
+	Palette.style_scrollbar(list_scroll)
 
 	_note_viewer = NOTE_VIEWER_SCENE.instantiate()
 	note_viewer_slot.add_child(_note_viewer)
@@ -142,16 +142,6 @@ func _ready() -> void:
 	_rebuild_tabs()
 	_rebuild_email_list()
 	_show_state("list")
-
-
-## Same thin/reskinned scrollbar as TaskManagerApp/KikuChatApp/SystemLogApp.
-func _style_scrollbar(target: ScrollContainer) -> void:
-	var vscroll := target.get_v_scroll_bar()
-	vscroll.custom_minimum_size = Vector2(3, 0)
-	vscroll.add_theme_stylebox_override("scroll", Palette.make_flat_style(Palette.WINDOW_BG, Palette.BORDER, 0))
-	vscroll.add_theme_stylebox_override("grabber", Palette.make_flat_style(Palette.BORDER_LIGHT, Palette.BORDER_LIGHT, 0))
-	vscroll.add_theme_stylebox_override("grabber_highlight", Palette.make_flat_style(Palette.TEXT_DIM, Palette.TEXT_DIM, 0))
-	vscroll.add_theme_stylebox_override("grabber_pressed", Palette.make_flat_style(Palette.TEXT_MAIN, Palette.TEXT_MAIN, 0))
 
 
 ## Two mutually-exclusive states, like DevCrackApp._show_state — not a
