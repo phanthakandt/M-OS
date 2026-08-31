@@ -155,6 +155,28 @@ static func sidebar_tab_style(selected: bool, hovered: bool = false) -> StyleBox
 	style.content_margin_bottom = 5
 	return style
 
+## FilesApp sidebar shortcut row: same hover-only left-accent-bar shape as
+## start_menu_item_style() (background fill + a border reserved only on the
+## left edge, held at a constant width so hover never shifts layout), but
+## with no persistent "selected" state at all — a sidebar click navigates
+## away immediately, so nothing about it should look "active" — and a
+## narrower 2px border/content margin tuned for this app's slim sidebar
+## column rather than the start menu's much wider rows. Doesn't reuse
+## sidebar_tab_style(): that builder's border reacts to `selected`, not
+## `hovered`, which is the opposite of what a selectionless hover-only row
+## needs.
+static func drive_sidebar_item_style(hovered: bool) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = TITLEBAR_BG if hovered else TRANSPARENT
+	style.border_width_left = 2
+	style.border_color = BORDER_LIGHT if hovered else TRANSPARENT
+	style.set_corner_radius_all(0)
+	style.content_margin_left = 5
+	style.content_margin_top = 4
+	style.content_margin_right = 5
+	style.content_margin_bottom = 4
+	return style
+
 ## Shared 0..1 corruption progress for both desktop_corruption_color() and
 ## corruption_modulate(), so the eased curve is only written once. Eased
 ## (quadratic, t*t) rather than linear, and deliberately ease-*in* rather

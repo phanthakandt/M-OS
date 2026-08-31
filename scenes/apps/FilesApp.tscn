@@ -18,36 +18,102 @@ offset_right = -5.0
 offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 0
 
-[node name="NavBar" type="HBoxContainer" parent="VBox" unique_id=1895766723]
+[node name="NavBarMargin" type="MarginContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="NavBar" type="HBoxContainer" parent="VBox/NavBarMargin"]
 layout_mode = 2
 theme_override_constants/separation = 3
 
-[node name="BackButton" type="Button" parent="VBox/NavBar" unique_id=54438542]
+[node name="BackButton" type="Button" parent="VBox/NavBarMargin/NavBar" unique_id=54438542]
 layout_mode = 2
 text = "<"
 
-[node name="ForwardButton" type="Button" parent="VBox/NavBar" unique_id=1516769107]
+[node name="ForwardButton" type="Button" parent="VBox/NavBarMargin/NavBar" unique_id=1516769107]
 layout_mode = 2
 text = ">"
 
-[node name="HeaderLabel" type="Label" parent="VBox/NavBar" unique_id=1224596927]
+[node name="BreadcrumbBar" type="HBoxContainer" parent="VBox/NavBarMargin/NavBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "drive://"
-clip_text = true
+theme_override_constants/separation = 3
 
-[node name="HiddenToggleButton" type="Button" parent="VBox/NavBar" unique_id=2082399478]
+[node name="HiddenToggleButton" type="Button" parent="VBox/NavBarMargin/NavBar" unique_id=2082399478]
 layout_mode = 2
 toggle_mode = true
 text = "[ ] show hidden"
 
-[node name="Scroll" type="ScrollContainer" parent="VBox" unique_id=1868821071]
+[node name="NavBarDivider" type="ColorRect" parent="VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 1)
+
+[node name="Body" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="Sidebar" type="VBoxContainer" parent="VBox/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+theme_override_constants/separation = 0
+
+[node name="SidebarScroll" type="ScrollContainer" parent="VBox/Body/Sidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="List" type="VBoxContainer" parent="VBox/Scroll" unique_id=1606646232]
+[node name="SidebarList" type="VBoxContainer" parent="VBox/Body/Sidebar/SidebarScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="Divider" type="ColorRect" parent="VBox/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(1, 0)
+
+[node name="MainColumn" type="VBoxContainer" parent="VBox/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="MainMargin" type="MarginContainer" parent="VBox/Body/MainColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+
+[node name="MainInner" type="VBoxContainer" parent="VBox/Body/MainColumn/MainMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ColumnHeader" type="HBoxContainer" parent="VBox/Body/MainColumn/MainMargin/MainInner"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="NameHeaderLabel" type="Label" parent="VBox/Body/MainColumn/MainMargin/MainInner/ColumnHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "name"
+
+[node name="KindHeaderLabel" type="Label" parent="VBox/Body/MainColumn/MainMargin/MainInner/ColumnHeader"]
+layout_mode = 2
+text = "kind"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="VBox/Body/MainColumn/MainMargin/MainInner"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="VBox/Body/MainColumn/MainMargin/MainInner/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 3
+
+[node name="StatusBar" type="PanelContainer" parent="VBox/Body/MainColumn"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBox/Body/MainColumn/StatusBar"]
+layout_mode = 2
+text = "0 items"

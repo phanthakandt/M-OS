@@ -212,7 +212,11 @@ func _open_files_app() -> void:
 	var content: FilesApp = FILES_APP_SCENE.instantiate()
 	content.window_manager = window_manager
 	content.warning_dialog = _warning_dialog
-	var win := window_manager.open_window(content, "drive", Rect2(40, 30, 160, 140))
+	# Widened from the original 160x140 — the sidebar, breadcrumb, kind
+	# column, and status bar all need more horizontal/vertical room than the
+	# old single-column plain-list layout did, same reason SystemLogApp's
+	# window was widened for its own multi-column layout.
+	var win := window_manager.open_window(content, "drive", Rect2(25, 15, 230, 175))
 	_singleton_windows["drive"] = win.window_id
 
 
