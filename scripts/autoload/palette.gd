@@ -45,14 +45,17 @@ static func make_flat_style(bg: Color, border_color: Color, border_width: int = 
 	style.set_content_margin_all(margin)
 	return style
 
-## Thins and reskins a ScrollContainer's VScrollBar with flat Palette styles —
+## Thins and reskins a scrollable node's VScrollBar with flat Palette styles —
 ## the engine's default width reads oversized against this game's tiny
 ## 384x216-space pixel fonts/rows. Was duplicated near-identically across
 ## TaskManagerApp/KikuChatApp/SystemLogApp/MosMailApp before being pulled
 ## here; every caller just does `Palette.style_scrollbar(scroll)` in its own
-## _ready() now.
-static func style_scrollbar(scroll: ScrollContainer) -> void:
-	var vscroll := scroll.get_v_scroll_bar()
+## _ready() now. Deliberately untyped rather than `ScrollContainer` — a
+## RichTextLabel (see NoteViewer) also exposes get_v_scroll_bar() but isn't a
+## ScrollContainer subclass, and there's no shared base class to type this
+## against instead; untyped just resolves the call at runtime for either.
+static func style_scrollbar(scroll) -> void:
+	var vscroll: VScrollBar = scroll.get_v_scroll_bar()
 	vscroll.custom_minimum_size = Vector2(3, 0)
 	vscroll.add_theme_stylebox_override("scroll", make_flat_style(WINDOW_BG, BORDER, 0))
 	vscroll.add_theme_stylebox_override("grabber", make_flat_style(BORDER_LIGHT, BORDER_LIGHT, 0))

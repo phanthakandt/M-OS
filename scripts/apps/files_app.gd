@@ -44,9 +44,9 @@ var _context_target_folder: FolderData
 @onready var name_header_label: Label = $VBox/Body/MainColumn/MainMargin/MainInner/ColumnHeader/NameHeaderLabel
 @onready var kind_header_label: Label = $VBox/Body/MainColumn/MainMargin/MainInner/ColumnHeader/KindHeaderLabel
 @onready var list: VBoxContainer = $VBox/Body/MainColumn/MainMargin/MainInner/Scroll/List
-@onready var status_bar: PanelContainer = $VBox/Body/MainColumn/StatusBar
-@onready var status_label: Label = $VBox/Body/MainColumn/StatusBar/StatusLabel
-@onready var sidebar_list: VBoxContainer = $VBox/Body/Sidebar/SidebarScroll/SidebarList
+@onready var status_bar: PanelContainer = $VBox/Body/MainColumn/StatusBarMargin/StatusBar
+@onready var status_label: Label = $VBox/Body/MainColumn/StatusBarMargin/StatusBar/StatusLabel
+@onready var sidebar_list: VBoxContainer = $VBox/Body/SidebarMargin/Sidebar/SidebarScroll/SidebarList
 @onready var divider: ColorRect = $VBox/Body/Divider
 @onready var _context_menu: ContextMenu = CONTEXT_MENU_SCENE.instantiate()
 

@@ -12,29 +12,34 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = -5.0
-offset_bottom = -5.0
+offset_left = 1.0
+offset_right = -1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 4
 
-[node name="TopBar" type="HBoxContainer" parent="VBox"]
+[node name="TopBarMargin" type="MarginContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+
+[node name="TopBar" type="HBoxContainer" parent="VBox/TopBarMargin"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="SearchField" type="LineEdit" parent="VBox/TopBar"]
+[node name="SearchField" type="LineEdit" parent="VBox/TopBarMargin/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 editable = false
 text = "ค้นหาเมล"
 
-[node name="AvatarBox" type="Panel" parent="VBox/TopBar"]
+[node name="AvatarBox" type="Panel" parent="VBox/TopBarMargin/TopBar"]
 layout_mode = 2
 custom_minimum_size = Vector2(13, 13)
 
-[node name="AvatarLabel" type="Label" parent="VBox/TopBar/AvatarBox"]
+[node name="AvatarLabel" type="Label" parent="VBox/TopBarMargin/TopBar/AvatarBox"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,16 +57,21 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="Sidebar" type="VBoxContainer" parent="VBox/Body"]
+[node name="SidebarMargin" type="MarginContainer" parent="VBox/Body"]
 layout_mode = 2
 custom_minimum_size = Vector2(46, 0)
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="Sidebar" type="VBoxContainer" parent="VBox/Body/SidebarMargin"]
+layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ComposeButton" type="Button" parent="VBox/Body/Sidebar"]
+[node name="ComposeButton" type="Button" parent="VBox/Body/SidebarMargin/Sidebar"]
 layout_mode = 2
 text = "+compose"
 
-[node name="TabList" type="VBoxContainer" parent="VBox/Body/Sidebar"]
+[node name="TabList" type="VBoxContainer" parent="VBox/Body/SidebarMargin/Sidebar"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
@@ -75,11 +85,16 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="ListScroll" type="ScrollContainer" parent="VBox/Body/MainArea"]
+[node name="ListScrollMargin" type="MarginContainer" parent="VBox/Body/MainArea"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
 
-[node name="List" type="VBoxContainer" parent="VBox/Body/MainArea/ListScroll"]
+[node name="ListScroll" type="ScrollContainer" parent="VBox/Body/MainArea/ListScrollMargin"]
+layout_mode = 2
+
+[node name="List" type="VBoxContainer" parent="VBox/Body/MainArea/ListScrollMargin/ListScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0

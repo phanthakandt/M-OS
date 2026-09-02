@@ -37,9 +37,9 @@ var _password_dialog: PasswordDialog
 ## function) instead of two loops racing to set scroll_vertical every frame.
 var _scroll_generation: int = 0
 
-@onready var sidebar_header: Label = $HBox/Sidebar/SidebarHeader
-@onready var contacts_scroll: ScrollContainer = $HBox/Sidebar/ContactsScroll
-@onready var contacts_list: VBoxContainer = $HBox/Sidebar/ContactsScroll/ContactsList
+@onready var sidebar_header: Label = $HBox/SidebarMargin/Sidebar/SidebarHeaderMargin/SidebarHeader
+@onready var contacts_scroll: ScrollContainer = $HBox/SidebarMargin/Sidebar/ContactsScroll
+@onready var contacts_list: VBoxContainer = $HBox/SidebarMargin/Sidebar/ContactsScroll/ContactsList
 @onready var divider: ColorRect = $HBox/Divider
 @onready var chat_header: Label = $HBox/ChatPane/ChatBody/ChatHeader
 @onready var messages_scroll: ScrollContainer = $HBox/ChatPane/ChatBody/MessagesScroll
@@ -60,8 +60,14 @@ func _ready() -> void:
 	sidebar_header.add_theme_font_size_override("font_size", 5)
 	sidebar_header.add_theme_color_override("font_color", Palette.TEXT_DIM)
 
-	chat_header.add_theme_font_override("font", Palette.font_chrome)
-	chat_header.add_theme_font_size_override("font_size", 4)
+	# font_body, not font_chrome — contact_name is Thai for every thread but
+	# thread_unknown ("แม่", "เก่ง", "พี่ชาย"), and font_chrome (Press Start
+	# 2P) has no Thai glyph coverage, the same mis-render MosMailApp's
+	# DetailSubjectLabel hit (see below). Size 7 to actually read as a
+	# header — bigger than the sidebar's own name_label (size 5), matching
+	# MosMailApp.detail_subject_label's same "bigger than the list row" call.
+	chat_header.add_theme_font_override("font", Palette.font_body)
+	chat_header.add_theme_font_size_override("font_size", 7)
 	chat_header.add_theme_color_override("font_color", Palette.TEXT_MAIN)
 
 	# Permanently editable = false — this app is read-only end to end (see

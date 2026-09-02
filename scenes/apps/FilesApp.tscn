@@ -12,16 +12,18 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = -5.0
-offset_bottom = -5.0
+offset_left = 1.0
+offset_right = -1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
 [node name="NavBarMargin" type="MarginContainer" parent="VBox"]
 layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 2
 
 [node name="NavBar" type="HBoxContainer" parent="VBox/NavBarMargin"]
@@ -55,16 +57,21 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="Sidebar" type="VBoxContainer" parent="VBox/Body"]
+[node name="SidebarMargin" type="MarginContainer" parent="VBox/Body"]
 layout_mode = 2
 custom_minimum_size = Vector2(48, 0)
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="Sidebar" type="VBoxContainer" parent="VBox/Body/SidebarMargin"]
+layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="SidebarScroll" type="ScrollContainer" parent="VBox/Body/Sidebar"]
+[node name="SidebarScroll" type="ScrollContainer" parent="VBox/Body/SidebarMargin/Sidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="SidebarList" type="VBoxContainer" parent="VBox/Body/Sidebar/SidebarScroll"]
+[node name="SidebarList" type="VBoxContainer" parent="VBox/Body/SidebarMargin/Sidebar/SidebarScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 1
@@ -83,6 +90,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/margin_left = 5
+theme_override_constants/margin_right = 5
 
 [node name="MainInner" type="VBoxContainer" parent="VBox/Body/MainColumn/MainMargin"]
 layout_mode = 2
@@ -111,9 +119,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 3
 
-[node name="StatusBar" type="PanelContainer" parent="VBox/Body/MainColumn"]
+[node name="StatusBarMargin" type="MarginContainer" parent="VBox/Body/MainColumn"]
+layout_mode = 2
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="StatusBar" type="PanelContainer" parent="VBox/Body/MainColumn/StatusBarMargin"]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="VBox/Body/MainColumn/StatusBar"]
+[node name="StatusLabel" type="Label" parent="VBox/Body/MainColumn/StatusBarMargin/StatusBar"]
 layout_mode = 2
 text = "0 items"

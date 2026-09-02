@@ -11,28 +11,36 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 5.0
-offset_top = 5.0
-offset_right = -5.0
-offset_bottom = -5.0
+offset_left = 1.0
+offset_right = -1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="Sidebar" type="VBoxContainer" parent="HBox"]
+[node name="SidebarMargin" type="MarginContainer" parent="HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(55, 0)
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="Sidebar" type="VBoxContainer" parent="HBox/SidebarMargin"]
+layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="SidebarHeader" type="Label" parent="HBox/Sidebar"]
+[node name="SidebarHeaderMargin" type="MarginContainer" parent="HBox/SidebarMargin/Sidebar"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+
+[node name="SidebarHeader" type="Label" parent="HBox/SidebarMargin/Sidebar/SidebarHeaderMargin"]
 layout_mode = 2
 text = "contacts"
 
-[node name="ContactsScroll" type="ScrollContainer" parent="HBox/Sidebar"]
+[node name="ContactsScroll" type="ScrollContainer" parent="HBox/SidebarMargin/Sidebar"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ContactsList" type="VBoxContainer" parent="HBox/Sidebar/ContactsScroll"]
+[node name="ContactsList" type="VBoxContainer" parent="HBox/SidebarMargin/Sidebar/ContactsScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
@@ -40,12 +48,15 @@ theme_override_constants/separation = 0
 [node name="Divider" type="ColorRect" parent="HBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(1, 0)
+size_flags_vertical = 3
 
 [node name="ChatPane" type="MarginContainer" parent="HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 3
 
 [node name="ChatBody" type="VBoxContainer" parent="HBox/ChatPane"]
 layout_mode = 2

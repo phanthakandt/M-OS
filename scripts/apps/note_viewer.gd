@@ -10,6 +10,7 @@ func _ready() -> void:
 	rich_text.add_theme_font_override("normal_font", Palette.font_body)
 	rich_text.add_theme_font_size_override("normal_font_size", 4)
 	rich_text.add_theme_color_override("default_color", Palette.TEXT_DIM)
+	Palette.style_scrollbar(rich_text)
 
 
 ## MosMailApp reuses a single NoteViewer instance across every email

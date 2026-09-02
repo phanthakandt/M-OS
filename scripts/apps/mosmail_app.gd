@@ -46,15 +46,21 @@ var _context_target_email: EmailData
 var _password_dialog: PasswordDialog
 var _note_viewer: NoteViewer
 
-@onready var search_field: LineEdit = $VBox/TopBar/SearchField
-@onready var avatar_box: Panel = $VBox/TopBar/AvatarBox
-@onready var avatar_label: Label = $VBox/TopBar/AvatarBox/AvatarLabel
+@onready var search_field: LineEdit = $VBox/TopBarMargin/TopBar/SearchField
+@onready var avatar_box: Panel = $VBox/TopBarMargin/TopBar/AvatarBox
+@onready var avatar_label: Label = $VBox/TopBarMargin/TopBar/AvatarBox/AvatarLabel
 @onready var top_bar_divider: ColorRect = $VBox/TopBarDivider
-@onready var compose_button: Button = $VBox/Body/Sidebar/ComposeButton
-@onready var tab_list: VBoxContainer = $VBox/Body/Sidebar/TabList
+@onready var compose_button: Button = $VBox/Body/SidebarMargin/Sidebar/ComposeButton
+@onready var tab_list: VBoxContainer = $VBox/Body/SidebarMargin/Sidebar/TabList
 @onready var body_divider: ColorRect = $VBox/Body/BodyDivider
-@onready var list_scroll: ScrollContainer = $VBox/Body/MainArea/ListScroll
-@onready var list: VBoxContainer = $VBox/Body/MainArea/ListScroll/List
+## _show_state() toggles this MarginContainer, not the ScrollContainer
+## itself — ListScrollMargin is what actually carries size_flags_vertical = 3
+## in MainArea's layout, so leaving it visible while its child is hidden
+## still claims half of MainArea's height, squeezing DetailMargin into
+## whatever's left (same reasoning as detail_margin below).
+@onready var list_scroll_margin: MarginContainer = $VBox/Body/MainArea/ListScrollMargin
+@onready var list_scroll: ScrollContainer = $VBox/Body/MainArea/ListScrollMargin/ListScroll
+@onready var list: VBoxContainer = $VBox/Body/MainArea/ListScrollMargin/ListScroll/List
 ## The MarginContainer, not DetailBox itself, is what _show_state() toggles —
 ## DetailBox's children need the 5px left/right inset DetailMargin provides
 ## (see MosMailApp.tscn); list rows don't need the same treatment since each
@@ -148,7 +154,7 @@ func _ready() -> void:
 ## persistent split-pane like KikuChatApp, since a list/detail toggle is
 ## exactly what a Gmail-style inbox reads as.
 func _show_state(state: String) -> void:
-	list_scroll.visible = state == "list"
+	list_scroll_margin.visible = state == "list"
 	detail_margin.visible = state == "detail"
 
 
