@@ -7,6 +7,7 @@ const DRIVE := preload("res://data/drive.tres")
 const DEVCRACK_SCENE := preload("res://scenes/apps/DevCrackApp.tscn")
 const NOTE_VIEWER_SCENE := preload("res://scenes/apps/NoteViewer.tscn")
 const CONTEXT_MENU_SCENE := preload("res://scenes/ui/ContextMenu.tscn")
+const PASSWORD_DIALOG_SCENE := preload("res://scenes/ui/PasswordDialog.tscn")
 
 ## Fixed width for both the "kind" column header and every row's kind label,
 ## so the two line up — set on both from here rather than hardcoded twice.
@@ -35,6 +36,12 @@ var _devcrack_windows: Dictionary = {}
 ## should act on.
 var _context_target_file: FileData
 var _context_target_folder: FolderData
+
+## The path _request_enter() is waiting to navigate to once the right code is
+## entered — same "stash it, resolve on submit/cancel" pattern KikuChatApp's
+## _pending_thread uses. Cleared on both submit and cancel.
+var _pending_folder_path: Array = []
+var _password_dialog: PasswordDialog
 
 @onready var back_button: Button = $VBox/NavBarMargin/NavBar/BackButton
 @onready var forward_button: Button = $VBox/NavBarMargin/NavBar/ForwardButton
@@ -100,6 +107,9 @@ func _ready() -> void:
 
 	add_child(_context_menu)
 	_context_menu.item_selected.connect(_on_context_item_selected)
+
+	_password_dialog = PASSWORD_DIALOG_SCENE.instantiate()
+	add_child(_password_dialog)
 
 	_history = [[DRIVE]]
 	_history_index = 0
@@ -178,7 +188,7 @@ func _current_folder() -> FolderData:
 func _enter_folder(folder: FolderData) -> void:
 	var new_path: Array = _current_path().duplicate()
 	new_path.append(folder)
-	_push_history(new_path)
+	_request_enter(new_path)
 
 
 ## Shared by the sidebar's shortcut rows and the breadcrumb's segment clicks —
@@ -191,7 +201,49 @@ func _enter_folder(folder: FolderData) -> void:
 func _navigate_to_path(path: Array) -> void:
 	if _paths_equal(path, _current_path()):
 		return
+	_request_enter(path)
+
+
+## Single gate both _enter_folder() and _navigate_to_path() go through before
+## actually pushing history — the folder actually being entered is always the
+## last element of path, regardless of which of the two built it. No visual
+## hint on a locked folder's row (same "no advance hints" rule as everywhere
+## else); the player only discovers the gate by trying to open it.
+func _request_enter(path: Array) -> void:
+	var folder: FolderData = path[path.size() - 1]
+	if folder.requires_code and not GameState.is_app_unlocked_by_code(folder.resource_path):
+		_pending_folder_path = path.duplicate()
+		_connect_password_dialog_once()
+		_password_dialog.ask("โฟลเดอร์นี้ถูกล็อกด้วยรหัสผ่าน")
+		return
 	_push_history(path.duplicate())
+
+
+## _password_dialog is one instance reused across every locked folder this
+## app opens, so guard against double-connecting the same signal twice —
+## same pattern KikuChatApp/Desktop._confirm_shutdown use for their own
+## shared dialogs.
+func _connect_password_dialog_once() -> void:
+	if not _password_dialog.submitted.is_connected(_on_password_submitted):
+		_password_dialog.submitted.connect(_on_password_submitted, CONNECT_ONE_SHOT)
+	if not _password_dialog.cancelled.is_connected(_on_password_cancelled):
+		_password_dialog.cancelled.connect(_on_password_cancelled, CONNECT_ONE_SHOT)
+
+
+func _on_password_submitted(text: String) -> void:
+	var path := _pending_folder_path
+	_pending_folder_path = []
+	var folder: FolderData = path[path.size() - 1]
+
+	if text.strip_edges() == folder.access_code:
+		GameState.unlock_app_with_code(folder.resource_path)
+		_push_history(path.duplicate())
+	elif warning_dialog:
+		warning_dialog.show_message("รหัสผ่านไม่ถูกต้อง")
+
+
+func _on_password_cancelled() -> void:
+	_pending_folder_path = []
 
 
 func _paths_equal(a: Array, b: Array) -> bool:
@@ -324,7 +376,6 @@ func _rebuild_breadcrumb() -> void:
 
 		var segment := Label.new()
 		segment.text = folder.folder_name
-		segment.clip_text = true
 		segment.add_theme_font_override("font", Palette.font_body)
 		segment.add_theme_font_size_override("font_size", 5)
 		segment.add_theme_color_override("font_color", Palette.TEXT_MAIN if is_last else Palette.TEXT_DIM)
@@ -386,7 +437,7 @@ func _add_folder_row(folder: FolderData) -> void:
 		name_text += "  (hidden)"
 		color = Palette.TEXT_FAINT
 
-	var row := _make_row("▸", name_text, "folder", color)
+	var row := _make_row("#", name_text, "folder", color)
 	row.gui_input.connect(_on_folder_row_gui_input.bind(folder))
 	list.add_child(row)
 

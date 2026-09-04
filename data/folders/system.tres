@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="FolderData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/folder_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/folders/system/sys_mos.tres" id="2"]
+[ext_resource type="Resource" path="res://data/folders/system/sys_cache.tres" id="3"]
+[ext_resource type="Resource" path="res://data/folders/system/sys_app.tres" id="4"]
+[ext_resource type="Resource" path="res://data/folders/system/users.tres" id="5"]
+[ext_resource type="Resource" path="res://data/folders/system/software.tres" id="6"]
+[ext_resource type="Resource" path="res://data/folders/system/resources.tres" id="7"]
+[ext_resource type="Resource" path="res://data/folders/system/temp.tres" id="8"]
+[ext_resource type="Resource" path="res://data/folders/system/patch.tres" id="9"]
+
+[resource]
+script = ExtResource("1")
+folder_name = "system"
+is_hidden = true
+subfolders = [ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")]

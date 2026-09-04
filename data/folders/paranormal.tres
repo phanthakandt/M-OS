@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FolderData" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/folder_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/folders/paranormal/theory.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+folder_name = "paranormal"
+subfolders = [ExtResource("2")]

@@ -1,7 +1,13 @@
 [gd_resource type="Resource" script_class="FolderData" format=3 uid="uid://c76ih2law2lkg"]
 
 [ext_resource type="Script" uid="uid://cj5ju8d4vwpbd" path="res://scripts/resources/folder_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/folders/system.tres" id="2"]
+[ext_resource type="Resource" path="res://data/folders/paranormal.tres" id="3"]
+[ext_resource type="Resource" path="res://data/folders/criminal_case.tres" id="4"]
+[ext_resource type="Resource" path="res://data/folders/diary.tres" id="5"]
+[ext_resource type="Resource" path="res://data/folders/pics.tres" id="6"]
 
 [resource]
 script = ExtResource("1")
 folder_name = "drive:"
+subfolders = [ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")]
